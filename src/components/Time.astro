@@ -1,0 +1,58 @@
+---
+const targetDate = new Date("2025-01-27T04:30:00").getTime();
+
+const now = new Date().getTime();
+const timeLeft = targetDate - now;
+
+let isNow = timeLeft <= 0;
+---
+
+<div id="countdown" class="">
+    {
+        isNow ? 
+            <div class="text-center text-4xl ">
+                <h1>Vamos de viaje 🛵</h1>
+            </div>
+        :
+            <div class="text-center text-sm font-light flex flex-row gap-8 [&_div]:flex [&_div]:flex-col [&_span]:text-6xl [&_span]:font-semibold">
+                <div><span id="days">00</span>días</div>
+                <div><span id="hours">00</span>horas</div>
+                <div><span id="minutes">00</span>minutos</div>
+                <div><span id="seconds">00</span>segundos</div>
+            </div>
+    }
+</div>
+
+<script>
+    const targetDate = new Date("2025-01-27T00:00:00").getTime();
+
+    function addCero(number: string) {
+        return number.length === 1 ? "0" + number : number;
+    }
+
+    function updateCountdown() {
+        const now = new Date().getTime();
+        const timeLeft = targetDate - now;
+
+        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24)).toString();
+        const hours = Math.floor(
+            (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+        ).toString();
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)).toString();
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000).toString();
+
+        const day = document.getElementById("days") as HTMLSpanElement;
+        const hour = document.getElementById("hours") as HTMLSpanElement;
+        const minute = document.getElementById("minutes") as HTMLSpanElement;
+        const second = document.getElementById("seconds") as HTMLSpanElement;
+
+        day.textContent = addCero(days);
+        hour.textContent = addCero(hours);
+        minute.textContent = addCero(minutes);
+        second.textContent = addCero(seconds);
+    }
+
+    updateCountdown();
+
+    setInterval(updateCountdown, 1000);
+</script>

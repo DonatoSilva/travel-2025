@@ -1,0 +1,32 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Time from "../components/Time.astro";
+import IArrow from "../components/icons/IArrow.astro";
+
+---
+
+<Layout title="Paseo 2025">
+	<div class="row-span-1 flex  justify-between w-full min-h-14 max-w-screen-2xl py-8 px-4 mx-auto">
+		<div class="h-min flex items-center gap-2">
+			<img src="/favicon.svg" alt="the page icon">
+			<h2 class="text-xl font-semibold text-orange-100">Paseo 2025</h2>
+		</div>
+		<div class="h-min flex items-center gap-2 text-xs">
+			invitados: <span class="px-4 rounded-2xl text-center bg-orange-100 font-medium text-orange-600 text-2xl">4</span>
+		</div>
+	</div>
+	<section class="flex flex-col row-span-1 flex-grow gap-6 justify-center items-center">
+		<h1 class="text-lg">Tiempo restante para el viaje</h1>
+		<Time />
+	</section>
+	<div class="row-span-1 w-full max-h-22 flex flex-col items-center justify-center">
+		<IArrow />
+		<p>Desliza para ver mas</p>
+	</div>
+</Layout>
+
+<style>
+	.flex-grow {
+		flex-grow: 1;
+	}
+</style>
