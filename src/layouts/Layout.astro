@@ -1,4 +1,6 @@
 ---
+import Logo from 'src/components/Logo.astro';
+
 interface Props {
     title: string;
 }
@@ -16,6 +18,26 @@ const {title} = Astro.props
 	<body>
 		<slot />
 	</body>
+	<footer
+		class="min-h-[200px] bg-orange-400 flex flex-col justify-center items-center gap-4 py-11"
+	>
+		<div class="flex flex-col gap-2 items-center">
+			<h1 class="text-4xl text-center font-semibold">
+				Aventuras de 2025
+			</h1>
+			<Logo />
+		</div>
+		<div class="flex flex-col">
+			<p class="text-orange-50 text-sm">
+				Todos los derechos reservados © 2025
+			</p>
+			<a
+				href="https://github.com/DonatoSilva"
+				class="w-full text-orange-100 text-center text-sm underline"
+				>Creado por Donato silva</a
+			>
+		</div>
+	</footer>
 </html>
 
 <style>

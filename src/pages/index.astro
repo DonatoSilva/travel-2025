@@ -11,62 +11,51 @@ import Logo from "src/components/Logo.astro";
 	<Init />
 	<Where />
 	<section
-		class="bg-orange-100 text-black flex flex-col gap-24 justify-center invitation"
+		class="min-h-screen flex flex-col items-center justify-center bg-orange-50"
 	>
-		<div
-			class="flex flex-col items-center justify-center w-full max-w-xl min-h-16 mx-auto [&>span]:text-8xl [&>span]:font-bold [&>span]:text-orange-700 title"
-		>
-			<span class="first">¿</span>
-			<div class="text-center">
-				<h3 class="text-5xl text-balance font-extrabold">Quieres hacer parte</h3>
-			</div>
-			<span class="last">?</span>
-		</div>
-		<div class="flex flex-col gap-8">
-			<p class="text-md text-balance text-center h-fit">
-				Suscribete, y vive una experiencia con amigos sobre ruedas visiando partes del pais
-			</p>
+	</section>
+	<section
+		class="bg-orange-100 text-black justify-center invitation"
+	>
+		<div class="flex flex-col xl:flex-row max-w-[1800px] w-full mx-auto gap-16">
 			<div
-				class="flex flex-col sm:flex-row items-center justify-center h-content gap-4"
+				class="flex flex-col items-center justify-center w-full min-h-16 mx-auto [&>span]:text-8xl [&>span]:font-bold [&>span]:text-orange-700 title"
 			>
-				<input
-					type="text"
-					placeholder="Ingresa tu correo"
-					class="min-h-10 w-full max-w-[500px] px-4 rounded-md"
-				/>
-				<button
-					type="button"
-					class="transition duration-600 px-4 py-2 w-full sm:w-fit rounded-md bg-orange-600 text-white hover:bg-orange-100 hover:text-orange-600 hover:font-semibold hover:border-2 hover:border-orange-600 border-box"
-					>Suscribir</button
+				<span class="first">¿</span>
+				<div class="text-center">
+					<h3 class="text-5xl text-balance font-extrabold">
+						Quieres hacer parte
+					</h3>
+				</div>
+				<span class="last">?</span>
+			</div>
+			<div class="flex flex-col w-full gap-8">
+				<p class="text-md text-balance text-center h-fit">
+					Suscribete, y vive una experiencia con amigos sobre ruedas
+					visiando partes del pais
+				</p>
+				<div
+					class="flex flex-col sm:flex-row items-center justify-center h-content gap-4"
 				>
+					<input
+						type="text"
+						placeholder="Ingresa tu correo"
+						class="min-h-10 w-full max-w-[500px] px-4 rounded-md"
+					/>
+					<button
+						type="button"
+						class="transition duration-500 px-4 py-2 w-full sm:w-fit rounded-md bg-orange-600 text-white border-2 border-orange-600 hover:bg-orange-100 hover:text-orange-600 hover:font-semibold hover:border-2 hover:border-orange-600 border-box"
+						>Suscribir</button
+					>
+				</div>
 			</div>
 		</div>
 	</section>
-	<footer
-		class="min-h-[100px] bg-orange-400 flex flex-col justify-center items-center gap-4 py-11"
-	>
-		<div class="flex flex-col items-center">
-			<h1 class="text-4xl text-center font-semibold">
-				Aventuras de 2025
-			</h1>
-			<Logo />
-		</div>
-		<div class="flex flex-col">
-			<p class="text-orange-50 text-sm">
-				Todos los derechos reservados © 2025
-			</p>
-			<a
-				href="https://github.com/DonatoSilva"
-				class="w-full text-orange-100 text-center text-sm underline"
-				>Creado por Donato silva</a
-			>
-		</div>
-	</footer>
 </Layout>
 
 <style>
 	.invitation {
-		padding: 30px 55px;
+		padding: 40px 55px;
 
 		.title {
 			display: flex;
