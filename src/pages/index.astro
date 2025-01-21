@@ -1,66 +1,188 @@
 ---
-import Section from "src/layouts/Section.astro";
 import Layout from "../layouts/Layout.astro";
 import Init from "../layouts/Section/Init.astro";
 
 import Where from "src/layouts/Section/Where.astro";
-import Logo from "src/components/Logo.astro";
+import Invitation from "src/layouts/Section/Invitation.astro";
+import Title from "src/components/Section/Title.astro";
+
+const viajeEnMoto = {
+	"Planificacion del viaje": [
+		{
+			pregunta:
+				"¿Cuál es la mejor época del año para hacer esta ruta en moto?",
+			respuesta:
+				"La mejor época para realizar esta ruta es durante la temporada seca, que va de diciembre a marzo y de junio a agosto.",
+		},
+		{
+			pregunta: "¿Cuánto tiempo lleva completar esta ruta en moto?",
+			respuesta:
+				"Esta ruta puede tomar de 2 a 4 días, dependiendo de las paradas y el ritmo del viaje.",
+		},
+	],
+	"Logistica y servicios": [
+		{
+			pregunta: "¿Hay estaciones de servicio en el camino?",
+			respuesta:
+				"Sí, hay varias estaciones de servicio a lo largo de la ruta, especialmente en las principales ciudades y pueblos.",
+		},
+		{
+			pregunta: "¿Las carreteras están en buenas condiciones?",
+			respuesta:
+				"En general, las carreteras están en buen estado, aunque algunas rutas pueden tener tramos de carretera destapada.",
+		},
+	],
+	"Atracciones turisticas": [
+		{
+			pregunta:
+				"¿Qué lugares turísticos se pueden visitar en cada destino?",
+			respuesta: {
+				VillaDeLeyva:
+					"La Plaza Mayor, el Museo Paleontológico, el Convento del Santo Ecce Homo.",
+				Raquira:
+					"Conocida por su artesanía de barro, puedes visitar talleres de cerámica y tiendas de artesanía.",
+				Sachica: "El Templo de Sáchica y los petroglifos.",
+			},
+		},
+	],
+	"Seguridad y equipamiento": [
+		{
+			pregunta: "¿Qué equipo de seguridad se recomienda llevar?",
+			respuesta:
+				"Es esencial llevar un casco certificado, guantes, chaqueta con protección, pantalones resistentes y botas de moto.",
+		},
+	],
+	"Alojamiento y estancia": [
+		{
+			pregunta: "¿Hay opciones de alojamiento en cada parada?",
+			respuesta:
+				"Sí, en cada destino hay diversas opciones de alojamiento que van desde hoteles y hostales hasta casas rurales y campings.",
+		},
+	],
+	Costos: [
+		{
+			pregunta:
+				"¿Cuál es el rango de precios de los hoteles y hostales en Barichara?",
+			respuesta:
+				"El rango de precios de los hoteles y hostales en Barichara varía desde económicos hasta más lujosos, oscilando entre 50,000 y 250,000 COP por noche.",
+		},
+		{
+			pregunta:
+				"¿Cuál es el promedio de consumo de gasolina para una moto en un viaje de 200 km en Colombia?",
+			respuesta:
+				"El consumo promedio de gasolina para una moto en un viaje de 200 km en Colombia suele ser de aproximadamente 6 a 10 litros, dependiendo del modelo y eficiencia de la moto.",
+		},
+	],
+};
 ---
 
 <Layout title="Paseo 2025">
 	<Init />
 	<Where />
 	<section
-		class="min-h-screen flex flex-col items-center justify-center bg-orange-50"
+		class="min-h-screen flex flex-col items-center justify-center bg-orange-50 text-black questions"
 	>
-	</section>
-	<section
-		class="bg-orange-100 text-black justify-center invitation"
-	>
-		<div class="flex flex-col xl:flex-row max-w-[1800px] w-full mx-auto gap-16">
-			<div
-				class="flex flex-col items-center justify-center w-full min-h-16 mx-auto [&>span]:text-8xl [&>span]:font-bold [&>span]:text-orange-700 title"
-			>
-				<span class="first">¿</span>
-				<div class="text-center">
-					<h3 class="text-5xl text-balance font-extrabold">
-						Quieres hacer parte
-					</h3>
-				</div>
-				<span class="last">?</span>
-			</div>
-			<div class="flex flex-col w-full gap-8">
-				<p class="text-md text-balance text-center h-fit">
-					Suscribete, y vive una experiencia con amigos sobre ruedas
-					visiando partes del pais
-				</p>
-				<div
-					class="flex flex-col sm:flex-row items-center justify-center h-content gap-4"
-				>
-					<input
-						type="text"
-						placeholder="Ingresa tu correo"
-						class="min-h-10 w-full max-w-[500px] px-4 rounded-md"
-					/>
-					<button
-						type="button"
-						class="transition duration-500 px-4 py-2 w-full sm:w-fit rounded-md bg-orange-600 text-white border-2 border-orange-600 hover:bg-orange-100 hover:text-orange-600 hover:font-semibold hover:border-2 hover:border-orange-600 border-box"
-						>Suscribir</button
-					>
-				</div>
-			</div>
+		<Title title="Preguntas frecuentes" subtitle="Quieres saber mas..." />
+
+		<div class="contentQuest">
+			{
+				Object.entries(viajeEnMoto).map(([key, value]) => (
+					<article class="w-full">
+						<h3 class="text-xl font-semibold">{key}</h3>
+						{value.map((item) => (
+							<details>
+								<summary class="text-lg font-semibold">
+									{item.pregunta}
+								</summary>
+								{typeof item.respuesta === "string" ? (
+									<p>{item.respuesta}</p>
+								) : (
+									<ul>
+										{Object.entries(item.respuesta).map(
+											([key, value]) => (
+												<li class="">
+													<strong>{key}:</strong>{" "}
+													{value}
+												</li>
+											),
+										)}
+									</ul>
+								)}
+							</details>
+						))}
+					</article>
+				))
+			}
 		</div>
 	</section>
+	<Invitation />
 </Layout>
 
 <style>
-	.invitation {
+	.questions {
 		padding: 40px 55px;
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		grid-template-rows: repeat(auto-fit, 1fr);
+		@apply gap-4;
 
-		.title {
-			display: flex;
-			flex-direction: row;
-			@apply gap-4;
+		.titleSections {
+			grid-column: -1 / 1;
+			margin: auto;
+		}
+
+		div {
+			grid-column: -1 / 1;
+
+			article {
+				height: min-content;
+				max-width: 900px;
+				margin: auto;
+				height: 100%;
+				padding-bottom: 10px;
+
+				summary {
+					cursor: pointer;
+				}
+
+				details {
+					margin-top: 1rem;
+					padding: 1rem;
+					@apply bg-orange-100 rounded-md;
+				}
+			}
+		}
+
+		@media (min-width: 1500px) {
+			div {
+				grid-row: 1 / 2;
+				grid-column: 1 / 2;
+			}
+
+			.titleSections {
+				grid-column: 2 / 3;
+				grid-row: 1;
+
+				margin-top: 0;
+				position: sticky;
+				top: 150px;
+			}
 		}
 	}
 </style>
+
+<script>
+	const details = document.querySelectorAll("details");
+
+	details.forEach((detail) => {
+		detail.addEventListener("toggle", (e) => {
+			if (detail.open) {
+				details.forEach((d) => {
+					if (d !== detail) {
+						d.removeAttribute("open");
+					}
+				});
+			}
+		});
+	});
+</script>
