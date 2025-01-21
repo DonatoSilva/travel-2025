@@ -3,10 +3,10 @@ interface Section {
     class: string;
 }
 
-const {class: className} = Astro.props
+const { class: className } = Astro.props;
 ---
 
-<section class={"h-screen " + className}>
+<section class={"min-h-screen " + className}>
     <slot />
 </section>
 
