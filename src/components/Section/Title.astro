@@ -1,0 +1,44 @@
+---
+interface TitleProps {
+    title: string;
+    subtitle: string;
+}
+
+const { title = "Titulo", subtitle = "Subtitulo" } = Astro.props;
+
+function getWords(text: string) {
+    const slits = text.split(" ");
+
+    if (slits.length === 1) {
+        return { lastWord: text, wordsExceptLast: "" };
+    }
+
+    const lastWord = slits.pop();
+    const wordsExceptLast = slits.join(" ");
+
+    return { lastWord, wordsExceptLast };
+}
+
+const { lastWord, wordsExceptLast } = getWords(subtitle);
+const { lastWord: lastWordTitle, wordsExceptLast: wordsExceptLastTitle } =
+    getWords(title);
+---
+
+<div class="max-w-2xl titleSections">
+    <h3 class="text-xl text-center">
+        <slot name="subtitle">
+            {wordsExceptLast}
+            <snap class="text-orange-700 font-semibold">{lastWord}</snap>
+        </slot>
+    </h3>
+    <h2 class="text-7xl font-black">
+        <slot name="title">
+            {wordsExceptLastTitle}
+            <br />
+            <snap class="text-orange-700">{lastWordTitle}</snap>
+        </slot>
+    </h2>
+    <br />
+    <br />
+    <slot name="after-body" />
+</div>
