@@ -8,7 +8,17 @@ import Title from "src/components/Section/Title.astro";
 
 <section class="min-h-screen">
 	<div class="h-full w-full flex flex-col justify-center items-center letter">
-		<Title title="¿A donde vamos?" subtitle="Aventuras del 2025" />
+		<Title title="¿A donde vamos?" subtitle="Aventuras del 2025">
+			<div
+				class="text-center [&>span]:font-extrabold [&>span]:text-4xl"
+				slot="after-body"
+			>
+				<span>27</span> enero - <span>29 </span>enero
+				<p class="text-sm text-gray-500 font-normal">
+					Click en las imagenes
+				</p>
+			</div>
+		</Title>
 	</div>
 	<div class="h-full w-full [&>div]:p-2 [&>div]:bg-white cards">
 		<Cards src={Raquira} alt="Imagen de Raquira" p="Raquira" />
