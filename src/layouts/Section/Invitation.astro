@@ -1,4 +1,4 @@
-<section class="bg-orange-100 text-black justify-center">
+<section class="bg-orange-100 text-black justify-center" id="invitation">
     <div class="flex flex-col xl:flex-row max-w-[1800px] w-full mx-auto gap-16">
         <div
             class="flex flex-col items-center justify-center w-full min-h-16 mx-auto [&>span]:text-8xl [&>span]:font-bold [&>span]:text-orange-700 title"
@@ -44,15 +44,62 @@
             flex-direction: row;
             @apply gap-4;
         }
+
+        button:disabled {
+            cursor: not-allowed;
+            @apply bg-orange-50 text-gray-500 border-gray-500;
+        }
     }
 </style>
 
 <script>
-    const btn = document.querySelector("#btnInvitation") as HTMLButtonElement;
+    import JSConfetti from "js-confetti";
+    const invitation = document.getElementById("invitation") as HTMLDivElement;
 
-    btn?.addEventListener("click", () => {
+    const input = invitation.querySelector("input") as HTMLInputElement;
+    const btn = invitation.querySelector("#btnInvitation") as HTMLButtonElement;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    btn?.addEventListener("click", async () => {
         btn.disabled = true;
-        alert("Gracias por suscribirte"); //// aqui se tiene que realizar la peticion al servidor y mostrar un mensaje de exito
-        btn.disabled = false;
+
+        const confetti = new JSConfetti();
+
+        const valueInput = input.value.trim();
+
+        if (!emailRegex.test(valueInput)) {
+            alert("Por favor, ingresa un correo valido");
+            btn.disabled = false;
+            return;
+        }
+
+        const res = await fetch("/api/subscribe", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: valueInput }),
+        });
+
+        if (res.ok) {
+            confetti
+                .addConfetti({
+                    emojis: ["🏍️", "🧳", "✨", "🥳", "🏍️"],
+                    emojiSize: 60,
+                    confettiNumber: 100,
+                })
+                .finally(() => {
+                    confetti.clearCanvas();
+                    btn.disabled = false;
+
+                    alert(
+                        "Gracias por suscribirte a nuestra comunidad de viajeros 🥳✨",
+                    );
+                });
+        } else {
+            alert(res.statusText);
+            btn.disabled = false;
+        }
     });
 </script>

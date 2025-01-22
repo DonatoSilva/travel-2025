@@ -1,5 +1,6 @@
 ---
-const targetDate = new Date("2025-01-27T04:30:00").getTime();
+const stringDate = "2025-01-27T05:30:00";
+const targetDate = new Date(stringDate).getTime();
 
 const now = new Date().getTime();
 const timeLeft = targetDate - now;
@@ -7,26 +8,70 @@ const timeLeft = targetDate - now;
 let isNow = timeLeft <= 0;
 ---
 
-<div id="countdown" class="">
+<div id="countdown" class="" data-time={stringDate} data-is-now={isNow}>
+    <div
+        class="text-center text-sm font-light flex flex-row gap-8 [&_div]:flex [&_div]:flex-col [&_span]:text-6xl [&_span]:font-semibold"
+    >
+        <div>
+            <span id="days">00</span>días
+        </div>
+        <div>
+            <span id="hours">00</span>horas
+        </div>
+        <div>
+            <span id="minutes">00</span>minutos
+        </div>
+        <div>
+            <span id="seconds">00</span>segundos
+        </div>
+    </div>
     {
-        isNow ? 
-            <div class="text-center text-4xl ">
+        isNow ? (
+            <div class="text-center text-md font-light">
+                <br />
                 <h1>Vamos de viaje 🛵</h1>
             </div>
-        :
-            <div class="text-center text-sm font-light flex flex-row gap-8 [&_div]:flex [&_div]:flex-col [&_span]:text-6xl [&_span]:font-semibold">
-                <div><span id="days">00</span>días</div>
-                <div><span id="hours">00</span>horas</div>
-                <div><span id="minutes">00</span>minutos</div>
-                <div><span id="seconds">00</span>segundos</div>
-            </div>
+        ) : (
+            ""
+        )
     }
 </div>
 
 <script>
-    const targetDate = new Date("2025-01-27T00:00:00").getTime();
+    import JSConfetti from "js-confetti";
+    const countdown = document.getElementById("countdown") as HTMLDivElement;
+    const stringDate = countdown.getAttribute("data-time") as string;
+
+    const targetDate = new Date(stringDate).getTime();
+
+    function confetti() {
+        const confetti = new JSConfetti();
+        confetti.addConfetti({
+            emojis: ["🛵", "🌴", "🌞", "🌊"],
+            emojiSize: 40,
+            confettiNumber: 100,
+        });
+    }
+
+    function insertHtml() {
+        const isNow = countdown.getAttribute("data-is-now") === "true";
+
+        if (!isNow) {
+            countdown.insertAdjacentHTML(
+                "beforeend",
+                `<div class="text-center text-md font-light">
+                    <br />
+                    <h1>Vamos de viaje 🛵</h1>
+                </div>`,
+            );
+        }
+    }
 
     function addCero(number: string) {
+        if (Number(number) < 0) {
+            return "00";
+        }
+
         return number.length === 1 ? "0" + number : number;
     }
 
@@ -38,7 +83,9 @@ let isNow = timeLeft <= 0;
         const hours = Math.floor(
             (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
         ).toString();
-        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)).toString();
+        const minutes = Math.floor(
+            (timeLeft % (1000 * 60 * 60)) / (1000 * 60),
+        ).toString();
         const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000).toString();
 
         const day = document.getElementById("days") as HTMLSpanElement;
@@ -50,9 +97,14 @@ let isNow = timeLeft <= 0;
         hour.textContent = addCero(hours);
         minute.textContent = addCero(minutes);
         second.textContent = addCero(seconds);
+
+        if (timeLeft <= 0) {
+            countdown.setAttribute("data-is-now", "true");
+            insertHtml();
+            confetti();
+            clearInterval(interval);
+        }
     }
 
-    updateCountdown();
-
-    setInterval(updateCountdown, 1000);
+    const interval = setInterval(updateCountdown, 1000);
 </script>
