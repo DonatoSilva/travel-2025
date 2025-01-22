@@ -31,7 +31,7 @@ const { lastWord: lastWordTitle, wordsExceptLast: wordsExceptLastTitle } =
             <snap class="text-orange-700 font-semibold">{lastWord}</snap>
         </slot>
     </h3>
-    <h2 class="text-7xl font-black">
+    <h2 class={`text-7xl font-bold`}>
         <slot name="title">
             {wordsExceptLastTitle}
             <br />
@@ -41,3 +41,13 @@ const { lastWord: lastWordTitle, wordsExceptLast: wordsExceptLastTitle } =
     <br />
     <slot name="after-body" />
 </div>
+
+<style>
+    .titleSections {
+        h2 {
+            @media (max-width: 768px) {
+                font-size: 12vw;
+            }
+        }
+    }
+</style>

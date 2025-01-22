@@ -26,6 +26,7 @@
                 />
                 <button
                     type="button"
+                    id="btnInvitation"
                     class="transition duration-500 px-4 py-2 w-full sm:w-fit rounded-md bg-orange-600 text-white border-2 border-orange-600 hover:bg-orange-100 hover:text-orange-600 hover:font-semibold hover:border-2 hover:border-orange-600 border-box"
                     >Suscribir</button
                 >
@@ -45,3 +46,13 @@
         }
     }
 </style>
+
+<script>
+    const btn = document.querySelector("#btnInvitation") as HTMLButtonElement;
+
+    btn?.addEventListener("click", () => {
+        btn.disabled = true;
+        alert("Gracias por suscribirte"); //// aqui se tiene que realizar la peticion al servidor y mostrar un mensaje de exito
+        btn.disabled = false;
+    });
+</script>
