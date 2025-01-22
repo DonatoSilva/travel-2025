@@ -61,12 +61,28 @@
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    btn?.addEventListener("click", () => {
+    btn?.addEventListener("click", async () => {
         btn.disabled = true;
 
         const confetti = new JSConfetti();
 
-        if (emailRegex.test(input.value.trim())) {
+        const valueInput = input.value.trim();
+
+        if (!emailRegex.test(valueInput)) {
+            alert("Por favor, ingresa un correo valido");
+            btn.disabled = false;
+            return;
+        }
+
+        const res = await fetch("/api/subscribe", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: valueInput }),
+        });
+
+        if (res.ok) {
             confetti
                 .addConfetti({
                     emojis: ["🏍️", "🧳", "✨", "🥳", "🏍️"],
@@ -82,7 +98,7 @@
                     );
                 });
         } else {
-            alert("Por favor, ingresa un correo valido");
+            alert(res.statusText);
             btn.disabled = false;
         }
     });
