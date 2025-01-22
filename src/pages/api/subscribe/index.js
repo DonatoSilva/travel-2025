@@ -11,8 +11,11 @@ export const POST = async ({ request, redirect }) => {
         return new Response("Invalid email", { status: 400, statusText: "Servidor: Correo invalido algo que no debeia pasar 😥, ingrese un email valido" })
     }
 
-    await db.insert(Subscription).values({ email, createdAt }).catch(() => {
-        return new Response("Error", { status: 500, statusText: "Servidor: Error al guardar el email 😥, intente de nuevo" })
+    await db.insert(Subscription).values({ email, createdAt }).catch((e) => {
+        return new Response(JSON.stringify(e), {
+            status: 500,
+            statusText: "Servidor: Error al guardar el email 😥, intente de nuevo"
+        })
     })
 
     return new Response("Success", { status: 200 })
