@@ -22,37 +22,16 @@ const id =
     </div>
 </div>
 
-<dialog
-    class={`${id} w-full h-full max-h-[650px] md:max-h-[550px] max-w-4xl px-8 py-4 bg-orange-50 rounded-md`}
->
-    <div class="w-full flex flex-row items-center">
-        <h4 class="text-4xl text-orange-700 font-semibold">{p}</h4>
-        <button
-            class="text-2xl bg-orange-700 text-white px-3 py-1 rounded flex justify-center items-center"
-            style="margin-left: auto;"
-        >
-            X
-        </button>
-    </div>
-</dialog>
+<style>
+    .card {
+        img {
+            transition: all 0.3s ease;
+        }
 
-<script>
-    const cards = document.querySelectorAll(".card");
-
-    cards.forEach((card) => {
-        const id = card.id;
-
-        let dialog = document.getElementsByClassName(
-            `${id}`,
-        )[0] as HTMLDialogElement;
-
-        card?.addEventListener("click", () => {
-            console.log("click");
-            dialog?.showModal();
-        });
-
-        dialog?.addEventListener("click", () => {
-            dialog?.close();
-        });
-    });
-</script>
+        &:hover {
+            img {
+                transform: scale(1.05);
+            }
+        }
+    }
+</style>

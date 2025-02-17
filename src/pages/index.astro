@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Init from "../layouts/Section/Init.astro";
+import Image from "astro/components/Image.astro";
 
 import Where from "src/layouts/Section/Where.astro";
 import Invitation from "src/layouts/Section/Invitation.astro";
@@ -74,11 +75,96 @@ const viajeEnMoto = {
 		},
 	],
 };
+
+import HeaderGallery from "@images/galery/header.jpg";
 ---
 
 <Layout title="Paseo 2025">
 	<Init />
 	<Where />
+	<section
+		class="min-h-screen flex flex-col items-center bg-orange-50 text-black gallery pt-40 md:py-0"
+	>
+		<div class="container px-4 h-full">
+			<div
+				class="headerGallery w-full h-80 border-8 border-white rounded-2xl"
+			>
+				<h2>Memorias</h2>
+				<Image
+					src={HeaderGallery}
+					alt="Casa invertida"
+					class="w-full h-full rounded-xl object-cover"
+				/>
+				<p class="absolute bottom-8 right-12 text-white">
+					Mejores momentos - 2025
+				</p>
+			</div>
+			<div
+				class="text-2xl message w-full flex justify-center items-center"
+			>
+				<div
+					class="flex flex-row gap-2 min-h-60 justify-center items-center mx-auto"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						class="gradient-icon"
+					>
+						<path
+							fill="url(#gradient)"
+							d="M16.22 5.599c.116-.116.052-.31-.11-.326a6 6 0 0 0-.51-.023c-1.434 0-2.695.672-3.6 1.542c-.905-.87-2.167-1.542-3.6-1.542c-2.78 0-5.15 2.08-5.15 4.78c0 1.85.789 3.476 1.882 4.852q.302.38.636.738a.295.295 0 0 0 .425.006l.637-.637a.305.305 0 0 0 .006-.422a11 11 0 0 1-.53-.619c-.96-1.208-1.556-2.515-1.556-3.918c0-1.75 1.57-3.28 3.65-3.28c1.194 0 2.31.713 3.005 1.619a.75.75 0 0 0 1.19 0c.556-.724 1.38-1.325 2.297-1.537a.43.43 0 0 0 .207-.112z"
+						></path>
+						<path
+							fill="url(#gradient)"
+							fill-rule="evenodd"
+							d="m4.503 19.436l-.033.034a.75.75 0 1 0 1.06 1.06l2.718-2.717q.385.288.769.553c.521.362 1.05.695 1.533.941c.454.231.975.443 1.45.443s.996-.212 1.45-.443a14 14 0 0 0 1.534-.941c1.366-.947 2.793-2.112 3.884-3.484c1.093-1.376 1.882-3.002 1.882-4.852c0-1.296-.546-2.45-1.421-3.298L21.53 4.53a.75.75 0 0 0-1.033-1.086L4.53 19.41zM18.268 7.793L9.32 16.74q.275.2.55.392c.496.343.962.634 1.36.838c.429.218.677.279.77.279s.341-.061.77-.28a12 12 0 0 0 1.36-.837c1.307-.906 2.602-1.974 3.564-3.185c.96-1.208 1.556-2.515 1.556-3.918c0-.847-.367-1.642-.982-2.237"
+							clip-rule="evenodd"></path>
+						<defs>
+							<linearGradient
+								id="gradient"
+								x1="0%"
+								y1="0%"
+								x2="100%"
+								y2="0%"
+							>
+								<stop offset="0%" style="stop-color: #1a1a1a">
+									<animate
+										attributeName="offset"
+										values="0;1;0"
+										dur="2s"
+										repeatCount="indefinite"></animate>
+								</stop>
+								<stop offset="25%" style="stop-color: #4d4d4d">
+									<animate
+										attributeName="offset"
+										values="0.25;1.25;0.25"
+										dur="2s"
+										repeatCount="indefinite"></animate>
+								</stop>
+								<stop offset="50%" style="stop-color: #808080">
+									<animate
+										attributeName="offset"
+										values="0.5;1.5;0.5"
+										dur="2s"
+										repeatCount="indefinite"></animate>
+								</stop>
+								<stop offset="75%" style="stop-color: #b3b3b3">
+									<animate
+										attributeName="offset"
+										values="0.75;1.75;0.75"
+										dur="2s"
+										repeatCount="indefinite"></animate>
+								</stop>
+							</linearGradient>
+						</defs>
+					</svg>
+					Por el momento esta seccion se esta construyendo
+				</div>
+			</div>
+		</div>
+	</section>
 	<section
 		class="min-h-screen flex flex-col items-center justify-center bg-orange-50 text-black questions"
 	>
@@ -167,6 +253,113 @@ const viajeEnMoto = {
 				position: sticky;
 				top: 150px;
 			}
+		}
+	}
+
+	.gallery {
+		.headerGallery {
+			position: relative;
+			overflow: hidden;
+
+			&::after {
+				content: "";
+				@apply rounded-xl;
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: linear-gradient(
+					to bottom,
+					rgba(0, 0, 0, 0),
+					rgba(0, 0, 0, 0.6)
+				);
+				pointer-events: none;
+			}
+
+			h2 {
+				content: "Galeria";
+				position: absolute;
+				top: 0px;
+				left: 0px;
+				@apply text-white py-2 px-4 bg-orange-500 rounded-ss-xl rounded-ee-xl;
+				font-size: 4rem;
+				font-weight: bold;
+				z-index: 13;
+			}
+
+			img {
+				transition: transform 0.5s ease-in-out;
+				&:hover {
+					transform: scale(1.05);
+				}
+			}
+
+			p {
+				@apply text-white text-2xl font-bold pe-2;
+				width: 0;
+				max-width: fit-content;
+				z-index: 10;
+				overflow: hidden;
+				white-space: nowrap;
+				animation: typing 6s steps(52) infinite alternate forwards;
+				animation-delay: 2s;
+
+				&::after {
+					content: "";
+					position: absolute;
+					top: 0;
+					right: 0;
+					width: 2px;
+					height: 100%;
+
+					border-right: 2px solid white;
+					animation: caret 1s infinite;
+				}
+			}
+		}
+	}
+
+	.message {
+		background-image: linear-gradient(
+			-225deg,
+			#1a1a1a 0%,
+			#4d4d4d 29%,
+			#808080 67%,
+			#b3b3b3 100%
+		);
+		background-size: auto auto;
+		background-size: 200% auto;
+		color: #fff;
+		background-clip: text;
+		text-fill-color: transparent;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		animation: textclip 2s alternate infinite;
+		display: inline-block;
+	}
+
+	@keyframes textclip {
+		to {
+			background-position: 200% center;
+		}
+	}
+
+	@keyframes typing {
+		from {
+			width: 0;
+		}
+		to {
+			width: 100%;
+		}
+	}
+
+	@keyframes caret {
+		from {
+			border-right-color: transparent;
+		}
+		to {
+			border-right-color: white;
 		}
 	}
 </style>
