@@ -1,0 +1,18 @@
+---
+interface Button {
+    type?: string;
+    id: string;
+    className?: string;
+}
+
+const { id, type = "button", className } = Astro.props;
+---
+
+<button
+    type={type}
+    id={id}
+    class={className +
+        " px-4 py-2 rounded-lg bg-orange-600 text-white border border-orange-500 hover:bg-orange-50 hover:text-orange-600 transition-colors duration-300"}
+>
+    <slot />
+</button>

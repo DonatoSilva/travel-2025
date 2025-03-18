@@ -1,0 +1,137 @@
+---
+import AddMemory from "@memory/AddMemory.astro";
+import Card from "@memory/album/card/Card.astro";
+import ContentAlbums from "@memory/album/ContentAlbums.astro";
+
+import Image from "astro/components/Image.astro";
+
+import HeaderGallery from "@images/galery/header.jpg";
+import { actions } from "astro:actions";
+import type { AlbumPreView } from "@/interfaces";
+import { firebase } from "@/firebase/config";
+
+const user = firebase.auth.currentUser;
+const userExists = Astro.locals.userExists;
+const { data, error } = await Astro.callAction(actions.Memory.getAlbums, {});
+const { data: dataInvited, error: errorInvited } = await Astro.callAction(
+    actions.Invited.isInvited,
+    { $email: user?.email ?? "" },
+);
+
+if (error) {
+    console.log(error);
+}
+
+const isInveted = dataInvited?.isInvited;
+console.log(isInveted, userExists);
+
+const albums: AlbumPreView[] = data!;
+---
+
+<section
+    class="min-h-screen flex flex-col items-center bg-orange-50 text-black gallery pt-40 md:py-0 md:pb-28"
+>
+    <div class="container px-4 h-full">
+        <div class="headerGallery w-full h-80 border-8 border-white rounded-xl">
+            <h2>Memorias</h2>
+            <Image
+                src={HeaderGallery}
+                alt="Casa invertida"
+                class="w-full h-full object-cover"
+            />
+            <p class="absolute bottom-8 right-12 text-white">
+                Mejores momentos - 2025
+            </p>
+        </div>
+        <ContentAlbums>
+            {userExists && isInveted ? <AddMemory /> : ""}
+            {
+                albums?.length == 0 ? (
+                    <div
+                        class={
+                            `${!userExists ? "lg:col-span-full" : "lg:col-span-1"}` +
+                            " text-center flex flex-col justify-center items-center h-full col-span-full md:col-span-2  text-gray-400  min-h-60 "
+                        }
+                    >
+                        <p class="text-2xl font-bold  mx-auto  ">
+                            No hay albums
+                        </p>
+                        <span>
+                            Se el primero en mostrar a los demas cual fue tu
+                            mejor memento
+                        </span>
+                    </div>
+                ) : (
+                    albums.map((albumData) => (
+                        <Card id={albumData.id} album={albumData} />
+                    ))
+                )
+            }
+        </ContentAlbums>
+    </div>
+</section>
+
+<style>
+    .gallery {
+        .headerGallery {
+            position: relative;
+            overflow: hidden;
+
+            &::after {
+                content: "";
+                @apply rounded-lg;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(
+                    to bottom,
+                    rgba(0, 0, 0, 0),
+                    rgba(0, 0, 0, 0.6)
+                );
+                pointer-events: none;
+            }
+
+            h2 {
+                position: absolute;
+                top: 0px;
+                left: 0px;
+                @apply text-white py-2 px-4 bg-orange-500 rounded-ee-xl;
+                font-size: max(1.5rem, 3rem);
+                font-weight: bold;
+                z-index: 13;
+            }
+
+            img {
+                transition: transform 0.5s ease-in-out;
+                &:hover {
+                    transform: scale(1.05);
+                }
+            }
+
+            p {
+                @apply text-white text-2xl font-bold pe-2;
+                width: 0;
+                max-width: fit-content;
+                z-index: 10;
+                overflow: hidden;
+                white-space: nowrap;
+                animation: typing 6s steps(52) infinite alternate forwards;
+                animation-delay: 2s;
+
+                &::after {
+                    content: "";
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    width: 2px;
+                    height: 100%;
+
+                    border-right: 2px solid white;
+                    animation: caret 1s infinite;
+                }
+            }
+        }
+    }
+</style>

@@ -1,0 +1,141 @@
+---
+import ButtonCardLike from "../../buttons/ButtonCardLike";
+
+interface Props {
+    id: string;
+    likes: number;
+    comments: number;
+    shares: number;
+    isLiked: boolean;
+    className?: string;
+}
+
+const { id, likes, comments, shares, isLiked, className } = Astro.props;
+---
+
+<card-album-footer
+    class={"card-Album-footer flex flex-row items-center gap-2 " + className}
+    data-id={id}
+>
+    <div class="flex flex-row items-center gap-2 px-2">
+        <ButtonCardLike
+            isLiked={isLiked}
+            albumId={id}
+            likeValue={likes}
+            client:load
+        />
+        <div class="h-4 w-[2px] bg-orange-300"></div>
+        <span class="flex flex-row items-center gap-1 comment btn"
+            ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                ><path
+                    fill="currentColor"
+                    d="M12.75 3a.75.75 0 0 0-1.5 0v2a.75.75 0 0 0 1.5 0z"
+                ></path><path
+                    fill="currentColor"
+                    fill-rule="evenodd"
+                    d="M22.75 12.057c0 1.837 0 3.293-.153 4.432c-.158 1.172-.49 2.121-1.238 2.87c-.749.748-1.698 1.08-2.87 1.238c-1.14.153-2.595.153-4.433.153H9.944c-1.837 0-3.293 0-4.432-.153c-1.172-.158-2.121-.49-2.87-1.238c-.748-.749-1.08-1.698-1.238-2.87c-.153-1.14-.153-2.595-.153-4.433v-.926q.001-.575.008-1.096c.014-.975.05-1.81.145-2.523c.158-1.172.49-2.121 1.238-2.87c.749-.748 1.698-1.08 2.87-1.238c.716-.096 1.558-.132 2.541-.145l.697-.005a1 1 0 0 1 1.001.999V5a2.25 2.25 0 0 0 4.5 0v-.75c0-.552.448-1 1-.998c1.29.006 2.359.033 3.239.151c1.172.158 2.121.49 2.87 1.238c.748.749 1.08 1.698 1.238 2.87c.153 1.14.153 2.595.153 4.433zM8 9.75a.75.75 0 0 0 0 1.5h8a.75.75 0 0 0 0-1.5zm0 3.5a.75.75 0 0 0 0 1.5h5.5a.75.75 0 0 0 0-1.5z"
+                    clip-rule="evenodd"></path></svg
+            >
+            <span class="value">{comments}</span></span
+        >
+        <div class="h-4 w-[2px] bg-orange-300"></div>
+        <span class="flex flex-row items-center gap-1 share btn"
+            ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                ><g fill="none" stroke="currentColor" stroke-width="1.5"
+                    ><path d="M9 11.5a2.5 2.5 0 1 1-5 0a2.5 2.5 0 0 1 5 0Z"
+                    ></path><path
+                        stroke-linecap="round"
+                        d="M14.32 16.802L9 13.29m5.42-6.45L9.1 10.352"
+                        opacity="0.5"></path><path
+                        d="M19 18.5a2.5 2.5 0 1 1-5 0a2.5 2.5 0 0 1 5 0Zm0-13a2.5 2.5 0 1 1-5 0a2.5 2.5 0 0 1 5 0Z"
+                    ></path></g
+                ></svg
+            >
+            <span class="value">{shares}</span></span
+        >
+    </div>
+</card-album-footer>
+
+<style>
+    .card-Album-footer {
+        span.btn {
+            cursor: pointer;
+            @apply hover:bg-orange-500 transition-all duration-200 px-2 py-1 rounded-md hover:text-white;
+
+            span {
+                @apply transition-colors duration-100;
+            }
+
+            &:hover {
+                span {
+                    @apply text-white;
+                }
+            }
+        }
+    }
+</style>
+
+<script>
+    import { showNotify } from "@/utils/popsNotification";
+    import { actions } from "astro:actions";
+
+    class CardAlbumFooter extends HTMLElement {
+        constructor() {
+            super();
+
+            const id = this.getAttribute("data-id")?.valueOf();
+            const btnShareValue = this.querySelector(
+                ".share .value",
+            ) as HTMLSpanElement;
+            const btnShare = this.querySelector(".share") as HTMLSpanElement;
+
+            async function handleShare() {
+                try {
+                    showNotify("Compartiendo... 🚀");
+                    const shareData = {
+                        title: "Compartir álbum de Travel-2025",
+                        text: "¡Mira este increíble álbum de viajes!",
+                        url: window.location.href + "/album/" + id,
+                    };
+
+                    if (navigator.share) {
+                        await navigator.share(shareData);
+                        showNotify("¡Compartido con éxito! 🎉");
+                    } else {
+                        await navigator.clipboard.writeText(shareData.url);
+                        showNotify("¡Enlace copiado al portapapeles! 📋");
+                    }
+
+                    const { data, error } = await actions.Memory.addShare({
+                        albumId: id ?? "",
+                    });
+
+                    if (error) {
+                        console.error(
+                            `Error al compartir, album ${id}:`,
+                            error,
+                        );
+                    }
+
+                    const { newShare } = data?.body!;
+                    btnShareValue.textContent = newShare.toString();
+                } catch (err) {
+                    console.error("Error al compartir:", err);
+                    showNotify("Error al compartir el álbum. 😢");
+                }
+            }
+
+            btnShare?.addEventListener("click", handleShare);
+        }
+    }
+
+    customElements.define("card-album-footer", CardAlbumFooter);
+</script>

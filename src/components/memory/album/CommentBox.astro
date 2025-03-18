@@ -1,0 +1,82 @@
+---
+import Comment from "./Comment.astro";
+
+interface Props {
+    albumId: string;
+}
+
+const { albumId } = Astro.props as Props;
+---
+
+<div
+    class="commentBox w-full min-h-28 h-fit rounded-md bg-white relative p-4"
+    id="commentBox"
+    data-id={albumId}
+>
+    <textarea
+        name="newComment"
+        id="newComment"
+        class="h-full w-full"
+        placeholder="Añade un comentario..."></textarea>
+
+    <button
+        class="transition-colors duration-200 flex gap-2 items-center px-4 py-2 absolute bottom-4 right-4 font-semibold border border-orange-200 rounded-md text-orange-600 hover:bg-orange-600 hover:text-white"
+        type="button"
+    >
+        <span class="btnText">Enviar</span>
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            ><path
+                fill="currentColor"
+                d="m18.636 15.67l1.716-5.15c1.5-4.498 2.25-6.747 1.062-7.934s-3.436-.438-7.935 1.062L8.33 5.364C4.7 6.574 2.885 7.18 2.37 8.067a2.72 2.72 0 0 0 0 2.73c.515.888 2.33 1.493 5.96 2.704c.45.15.957.042 1.294-.291l5.506-5.455a.79.79 0 1 1 1.11 1.122l-5.416 5.366a1.4 1.4 0 0 0-.324 1.427c1.21 3.63 1.816 5.446 2.703 5.962a2.72 2.72 0 0 0 2.731 0c.887-.516 1.492-2.331 2.703-5.962"
+            ></path></svg
+        >
+    </button>
+</div>
+
+<template id="templateComment">
+    <Comment
+        className="commentInAnimation"
+        commentId=""
+        content=""
+        userId=""
+        createdAt={new Date()}
+        isTemplate={true}
+    />
+</template>
+
+<style>
+    .commentBox {
+        textarea {
+            resize: none;
+            field-sizing: content;
+
+            &:focus {
+                outline: none;
+            }
+        }
+
+        button {
+            svg {
+                transition: transform 0.2s ease-in-out;
+            }
+
+            &:hover > svg {
+                transform: rotateZ(40deg);
+            }
+        }
+    }
+</style>
+
+<script>
+    const commentBox = document.querySelector(".commentBox");
+    const textarea = commentBox?.querySelector("textarea");
+
+    commentBox?.addEventListener("click", (e) => {
+        if (e.target === textarea) return;
+        textarea?.focus();
+    });
+</script>

@@ -5,254 +5,63 @@ import Image from "astro/components/Image.astro";
 
 import Where from "src/layouts/Section/Where.astro";
 import Invitation from "src/layouts/Section/Invitation.astro";
-import Title from "src/components/Section/Title.astro";
-
-const viajeEnMoto = {
-	"Planificacion del viaje": [
-		{
-			pregunta:
-				"¿Cuál es la mejor época del año para hacer esta ruta en moto?",
-			respuesta:
-				"La mejor época para realizar esta ruta es durante la temporada seca, que va de diciembre a marzo y de junio a agosto. Por eso es que se escogió el 27 enero para el viaje.",
-		},
-		{
-			pregunta: "¿Cuánto tiempo lleva completar esta ruta en moto?",
-			respuesta:
-				"Esta ruta puede tomar de 2 a 3 días, dependiendo de las paradas y el ritmo del viaje.",
-		},
-	],
-	"Logistica y servicios": [
-		{
-			pregunta: "¿Hay estaciones de servicio en el camino?",
-			respuesta:
-				"Sí, hay varias estaciones de servicio a lo largo de la ruta, especialmente en las principales ciudades y pueblos. Pero se recomienda llenar el tanque saliendo de barichara.",
-		},
-		{
-			pregunta: "¿Las carreteras están en buenas condiciones?",
-			respuesta:
-				"En general, las carreteras están en buen estado, aunque algunas rutas pueden tener tramos de carretera destapada.",
-		},
-	],
-	"Atracciones turisticas": [
-		{
-			pregunta:
-				"¿Qué lugares turísticos se pueden visitar en cada destino?",
-			respuesta: {
-				VillaDeLeyva:
-					"La Plaza Mayor, el Museo Paleontológico, el Convento del Santo Ecce Homo, Museo del chocolate.",
-				Raquira:
-					"Conocida por su artesanía de barro, puedes visitar talleres de cerámica, tiendas de artesanía, laverinto y su mano del artesano.",
-				Sachica: "El Templo de Sáchica, los termales y los petroglifos",
-			},
-		},
-	],
-	"Seguridad y equipamiento": [
-		{
-			pregunta: "¿Qué equipo de seguridad se recomienda llevar?",
-			respuesta:
-				"Es esencial llevar un casco certificado, guantes, chaqueta con protección, pantalones resistentes.",
-		},
-	],
-	"Alojamiento y estancia": [
-		{
-			pregunta: "¿Hay opciones de alojamiento en cada parada?",
-			respuesta:
-				"Sí, en cada destino hay diversas opciones de alojamiento que van desde hoteles y hostales hasta casas rurales y campings. Para esta ruta se arquilo un apartaento en Villa de leyva",
-		},
-	],
-	Costos: [
-		{
-			pregunta:
-				"¿Cuál es el rango de precios de los hoteles y hostales en Villa de leyva?",
-			respuesta:
-				"El rango de precios de los hoteles y hostales en Villa de leyva varía desde económicos hasta más lujosos, oscilando entre 50,000 y 250,000 COP por noche.",
-		},
-		{
-			pregunta:
-				"¿Cuál es el promedio de consumo de gasolina para una moto en un viaje de 200 km en Colombia?",
-			respuesta:
-				"El consumo promedio de gasolina para una moto en un viaje de 200 km en Colombia suele ser de aproximadamente 6 a 10 litros, dependiendo del modelo y eficiencia de la moto. teniendo en cuanta ese rango se estima un costo de 60,000 a 80,000 COP.",
-		},
-	],
-};
-
-import HeaderGallery from "@images/galery/header.jpg";
+import Memorys from "src/layouts/Section/Memorys.astro";
+import Questions from "src/layouts/Section/Questions.astro";
+import AddMemoryModal from "@components/memory/modal/addMemoryModal.astro";
 ---
 
 <Layout title="Paseo 2025">
 	<Init />
 	<Where />
-	<section
-		class="min-h-screen flex flex-col items-center bg-orange-50 text-black gallery pt-40 md:py-0"
-	>
-		<div class="container px-4 h-full">
-			<div
-				class="headerGallery w-full h-80 border-8 border-white rounded-2xl"
-			>
-				<h2>Memorias</h2>
-				<Image
-					src={HeaderGallery}
-					alt="Casa invertida"
-					class="w-full h-full rounded-xl object-cover"
-				/>
-				<p class="absolute bottom-8 right-12 text-white">
-					Mejores momentos - 2025
-				</p>
-			</div>
-			<div
-				class="text-2xl message w-full flex justify-center items-center"
-			>
-				<div
-					class="flex flex-row gap-2 min-h-60 justify-center items-center mx-auto"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						class="gradient-icon"
-					>
-						<path
-							fill="url(#gradient)"
-							d="M16.22 5.599c.116-.116.052-.31-.11-.326a6 6 0 0 0-.51-.023c-1.434 0-2.695.672-3.6 1.542c-.905-.87-2.167-1.542-3.6-1.542c-2.78 0-5.15 2.08-5.15 4.78c0 1.85.789 3.476 1.882 4.852q.302.38.636.738a.295.295 0 0 0 .425.006l.637-.637a.305.305 0 0 0 .006-.422a11 11 0 0 1-.53-.619c-.96-1.208-1.556-2.515-1.556-3.918c0-1.75 1.57-3.28 3.65-3.28c1.194 0 2.31.713 3.005 1.619a.75.75 0 0 0 1.19 0c.556-.724 1.38-1.325 2.297-1.537a.43.43 0 0 0 .207-.112z"
-						></path>
-						<path
-							fill="url(#gradient)"
-							fill-rule="evenodd"
-							d="m4.503 19.436l-.033.034a.75.75 0 1 0 1.06 1.06l2.718-2.717q.385.288.769.553c.521.362 1.05.695 1.533.941c.454.231.975.443 1.45.443s.996-.212 1.45-.443a14 14 0 0 0 1.534-.941c1.366-.947 2.793-2.112 3.884-3.484c1.093-1.376 1.882-3.002 1.882-4.852c0-1.296-.546-2.45-1.421-3.298L21.53 4.53a.75.75 0 0 0-1.033-1.086L4.53 19.41zM18.268 7.793L9.32 16.74q.275.2.55.392c.496.343.962.634 1.36.838c.429.218.677.279.77.279s.341-.061.77-.28a12 12 0 0 0 1.36-.837c1.307-.906 2.602-1.974 3.564-3.185c.96-1.208 1.556-2.515 1.556-3.918c0-.847-.367-1.642-.982-2.237"
-							clip-rule="evenodd"></path>
-						<defs>
-							<linearGradient
-								id="gradient"
-								x1="0%"
-								y1="0%"
-								x2="100%"
-								y2="0%"
-							>
-								<stop offset="0%" style="stop-color: #1a1a1a">
-									<animate
-										attributeName="offset"
-										values="0;1;0"
-										dur="2s"
-										repeatCount="indefinite"></animate>
-								</stop>
-								<stop offset="25%" style="stop-color: #4d4d4d">
-									<animate
-										attributeName="offset"
-										values="0.25;1.25;0.25"
-										dur="2s"
-										repeatCount="indefinite"></animate>
-								</stop>
-								<stop offset="50%" style="stop-color: #808080">
-									<animate
-										attributeName="offset"
-										values="0.5;1.5;0.5"
-										dur="2s"
-										repeatCount="indefinite"></animate>
-								</stop>
-								<stop offset="75%" style="stop-color: #b3b3b3">
-									<animate
-										attributeName="offset"
-										values="0.75;1.75;0.75"
-										dur="2s"
-										repeatCount="indefinite"></animate>
-								</stop>
-							</linearGradient>
-						</defs>
-					</svg>
-					Por el momento esta seccion se esta construyendo
-				</div>
-			</div>
-		</div>
-	</section>
-	<section
-		class="min-h-screen flex flex-col items-center justify-center bg-orange-50 text-black questions"
-	>
-		<Title title="Preguntas frecuentes" subtitle="Quieres saber mas..." />
-
-		<div class="contentQuest">
-			{
-				Object.entries(viajeEnMoto).map(([key, value]) => (
-					<article class="w-full">
-						<h3 class="text-xl font-semibold">{key}</h3>
-						{value.map((item) => (
-							<details>
-								<summary class="text-lg font-semibold">
-									{item.pregunta}
-								</summary>
-								{typeof item.respuesta === "string" ? (
-									<p>{item.respuesta}</p>
-								) : (
-									<ul>
-										{Object.entries(item.respuesta).map(
-											([key, value]) => (
-												<li class="">
-													<strong>{key}:</strong>{" "}
-													{value}
-												</li>
-											),
-										)}
-									</ul>
-								)}
-							</details>
-						))}
-					</article>
-				))
-			}
-		</div>
-	</section>
+	<Memorys />
+	<Questions />
 	<Invitation />
 </Layout>
 
+<AddMemoryModal />
+
 <style>
-	.questions {
-		padding: 40px 55px;
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		grid-template-rows: repeat(auto-fit, 1fr);
-		@apply gap-4;
+	/* Add animation to "page fraction" */
+	.message {
+		background-image: linear-gradient(
+			-225deg,
+			#1a1a1a 0%,
+			#4d4d4d 29%,
+			#808080 67%,
+			#b3b3b3 100%
+		);
+		background-size: auto auto;
+		background-size: 200% auto;
+		color: #fff;
+		background-clip: text;
+		text-fill-color: transparent;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		animation: textclip 2s alternate infinite;
+		display: inline-block;
+	}
 
-		.titleSections {
-			grid-column: -1 / 1;
-			margin: auto;
+	@keyframes textclip {
+		to {
+			background-position: 200% center;
 		}
+	}
 
-		div {
-			grid-column: -1 / 1;
-
-			article {
-				height: min-content;
-				max-width: 900px;
-				margin: auto;
-				height: 100%;
-				padding-bottom: 10px;
-
-				summary {
-					cursor: pointer;
-				}
-
-				details {
-					margin-top: 1rem;
-					padding: 1rem;
-					@apply bg-orange-100 rounded-md;
-				}
-			}
+	@keyframes typing {
+		from {
+			width: 0;
 		}
+		to {
+			width: 100%;
+		}
+	}
 
-		@media (min-width: 1500px) {
-			div {
-				grid-row: 1 / 2;
-				grid-column: 1 / 2;
-			}
-
-			.titleSections {
-				grid-column: 2 / 3;
-				grid-row: 1;
-
-				margin-top: 0;
-				position: sticky;
-				top: 150px;
-			}
+	@keyframes caret {
+		from {
+			border-right-color: transparent;
+		}
+		to {
+			border-right-color: white;
 		}
 	}
 
@@ -363,22 +172,3 @@ import HeaderGallery from "@images/galery/header.jpg";
 		}
 	}
 </style>
-
-<script>
-	const details = document.querySelectorAll("details");
-
-	details.forEach((detail) => {
-		detail.addEventListener("toggle", (e) => {
-			if (detail.open) {
-				const openDetails = document.querySelectorAll("details[open]");
-
-				openDetails.forEach((open) => {
-					if (open !== detail) {
-						open.removeAttribute("open");
-						console.log(open);
-					}
-				});
-			}
-		});
-	});
-</script>

@@ -54,6 +54,7 @@
 
 <script>
     import JSConfetti from "js-confetti";
+    import { actions } from "astro:actions";
     const invitation = document.getElementById("invitation") as HTMLDivElement;
 
     const input = invitation.querySelector("input") as HTMLInputElement;
@@ -74,15 +75,17 @@
             return;
         }
 
-        const res = await fetch("/api/subscribe", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email: valueInput }),
+        const { data, error } = await actions.Subscribe.add({
+            email: valueInput,
         });
 
-        if (res.ok) {
+        if (error) {
+            alert(error);
+            btn.disabled = false;
+            return;
+        }
+
+        if (data?.ok) {
             confetti
                 .addConfetti({
                     emojis: ["🏍️", "🧳", "✨", "🥳", "🏍️"],
@@ -92,15 +95,13 @@
                 .finally(() => {
                     confetti.clearCanvas();
                     input.value = "";
-                    btn.disabled = false;
 
                     alert(
                         "Gracias por suscribirte a nuestra comunidad de viajeros 🥳✨",
                     );
                 });
-        } else {
-            alert(res.statusText);
-            btn.disabled = false;
         }
+
+        btn.disabled = false;
     });
 </script>

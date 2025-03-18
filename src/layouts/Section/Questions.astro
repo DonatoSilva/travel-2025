@@ -1,0 +1,111 @@
+---
+import Title from "src/components/Section/Title.astro";
+import { viajeEnMoto } from "src/utils/questions";
+---
+
+<section
+    class="min-h-screen flex flex-col items-center justify-center bg-orange-50 text-black questions"
+>
+    <Title title="Preguntas frecuentes" subtitle="Quieres saber mas..." />
+    <div class="contentQuest">
+        {
+            Object.entries(viajeEnMoto).map(([key, value]) => (
+                <article class="w-full">
+                    <h3 class="text-xl font-semibold">{key}</h3>
+                    {value.map((item) => (
+                        <details>
+                            <summary class="text-lg font-semibold">
+                                {item.pregunta}
+                            </summary>
+                            {typeof item.respuesta === "string" ? (
+                                <p>{item.respuesta}</p>
+                            ) : (
+                                <ul>
+                                    {Object.entries(item.respuesta).map(
+                                        ([key, value]) => (
+                                            <li class="">
+                                                <strong>{key}:</strong> {value}
+                                            </li>
+                                        ),
+                                    )}
+                                </ul>
+                            )}
+                        </details>
+                    ))}
+                </article>
+            ))
+        }
+    </div>
+</section>
+
+<style>
+    .questions {
+        padding: 40px 55px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(auto-fit, 1fr);
+        @apply gap-4;
+
+        .titleSections {
+            grid-column: -1 / 1;
+            margin: auto;
+        }
+
+        div {
+            grid-column: -1 / 1;
+
+            article {
+                height: min-content;
+                max-width: 900px;
+                margin: auto;
+                height: 100%;
+                padding-bottom: 10px;
+
+                summary {
+                    cursor: pointer;
+                }
+
+                details {
+                    margin-top: 1rem;
+                    padding: 1rem;
+                    @apply bg-orange-100 rounded-md;
+                }
+            }
+        }
+
+        @media (min-width: 1500px) {
+            div {
+                grid-row: 1 / 2;
+                grid-column: 1 / 2;
+            }
+
+            .titleSections {
+                grid-column: 2 / 3;
+                grid-row: 1;
+
+                margin-top: 0;
+                position: sticky;
+                top: 150px;
+            }
+        }
+    }
+</style>
+
+<script>
+    const details = document.querySelectorAll("details");
+
+    details.forEach((detail) => {
+        detail.addEventListener("toggle", (e) => {
+            if (detail.open) {
+                const openDetails = document.querySelectorAll("details[open]");
+
+                openDetails.forEach((open) => {
+                    if (open !== detail) {
+                        open.removeAttribute("open");
+                        console.log(open);
+                    }
+                });
+            }
+        });
+    });
+</script>

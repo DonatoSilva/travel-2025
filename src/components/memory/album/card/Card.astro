@@ -1,0 +1,212 @@
+---
+import { firebase } from "@/firebase/config";
+import type { AlbumPreView, User as UserType } from "@/interfaces";
+import { and, db, eq, Like } from "astro:db";
+import CardFooter from "./CardFooter.astro";
+import UserPerfil from "../UserPerfil.astro";
+interface Props {
+    id: string;
+    album: AlbumPreView;
+}
+
+const { id, album } = Astro.props;
+
+const user: UserType = album.user;
+
+const existUser = Astro.locals.userExists;
+const currectUser = firebase.auth.currentUser;
+
+const liked = existUser
+    ? await db
+          .select()
+          .from(Like)
+          .where(
+              and(
+                  eq(Like.userId, currectUser!.uid),
+                  eq(Like.albumId, album.id),
+              ),
+          )
+          .limit(1)
+    : [];
+
+const isLiked = !!liked.length;
+---
+
+<card-album data-album-id={id}>
+    <a
+        href={"/album/" + id}
+        class="card-Album w-full flex flex-col items-center justify-center gap-3 bg-orange-100 rounded-lg p-3 hover:shadow-lg transition-shadow duration-200 min-h-[432px]"
+    >
+        <div class="swiper mySwiper min-h-72">
+            <!-- Additional required wrapper -->
+            <div class="swiper-wrapper">
+                <!-- Slides -->
+                {
+                    album.photos.map((img) => (
+                        <div class="swiper-slide">
+                            <img src={img.url.toString()} alt={img.alt} />
+                        </div>
+                    ))
+                }
+            </div>
+            <!-- If we need pagination -->
+            <div class="swiper-pagination"></div>
+
+            <!-- If we need navigation buttons -->
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+            <UserPerfil
+                className="absolute top-2 left-2 opacity-85 hover:opacity-100 transition-opacity "
+                user={user}
+            />
+        </div>
+        <div
+            class="flex flex-col justify-end card-Album-body px-2 w-full h-full"
+        >
+            <p class="card-Album-text flex-1">
+                {
+                    album.description ? (
+                        album.description
+                    ) : (
+                        <span class="text-gray-400 border-l ps-2 border-gray-400">
+                            Sin descripción
+                        </span>
+                    )
+                }
+            </p>
+            <span class="text-xs"
+                ><strong>Creado:</strong>
+                {album.createdAt.toLocaleDateString()}</span
+            >
+        </div>
+        <CardFooter
+            id={id ?? ""}
+            likes={album.likes}
+            comments={album.comments}
+            shares={album.share}
+            isLiked={isLiked}
+            className="justify-center max-w-min"
+        />
+    </a>
+</card-album>
+
+<script>
+    // core version + navigation, pagination modules:
+    import Swiper from "swiper";
+    import { Navigation, Pagination } from "swiper/modules";
+    // import Swiper and modules styles
+    import "swiper/css";
+    import "swiper/css/navigation";
+    import "swiper/css/pagination";
+
+    const swiper = new Swiper(".mySwiper", {
+        modules: [Navigation, Pagination],
+
+        pagination: {
+            el: ".swiper-pagination",
+            type: "fraction",
+        },
+
+        navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+        },
+    });
+</script>
+
+<script>
+    import { navigate } from "astro:transitions/client";
+
+    class CardAlbum extends HTMLElement {
+        constructor() {
+            super();
+            const aElement = this.querySelector("a") as HTMLAnchorElement;
+            const next = this.querySelector(".swiper-button-next");
+            const prev = this.querySelector(".swiper-button-prev");
+            const albumText = this.querySelector(".card-Album-text");
+            const albumFooter = this.querySelector(".card-Album-footer");
+
+            const noClickElements = [next, prev, albumText, albumFooter];
+
+            aElement.addEventListener("click", (e) => {
+                e.preventDefault();
+
+                if (
+                    noClickElements.some((elem) =>
+                        elem?.contains(e.target as Element),
+                    )
+                )
+                    return;
+
+                navigate(aElement.href);
+            });
+        }
+    }
+
+    customElements.define("card-album", CardAlbum);
+</script>
+
+<style>
+    .swiper {
+        @apply rounded-md;
+        max-width: 100%;
+        height: 250px;
+
+        .swiper-wrapper {
+            .swiper-slide {
+                img {
+                    object-fit: cover;
+                    width: 100%;
+                    height: 100%;
+                }
+            }
+        }
+    }
+    .swiper-pagination {
+        color: #fff;
+        font-size: 10px;
+    }
+
+    .swiper-button-prev,
+    .swiper-button-next {
+        color: #fff;
+        &::after {
+            font-size: 30px;
+        }
+    }
+
+    .card-Album {
+        cursor: pointer;
+        .card-Album-body {
+            min-height: 60px;
+            overflow: hidden;
+
+            .card-Album-text {
+                cursor: auto;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 3;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                height: min-content;
+            }
+        }
+
+        .card-Album-footer {
+            span.btn {
+                cursor: pointer;
+                @apply hover:bg-orange-500 transition-all duration-300 px-2 py-1 rounded-md hover:text-white;
+
+                span {
+                    @apply transition-colors duration-300;
+                }
+
+                &:hover {
+                    span {
+                        @apply text-white;
+                    }
+                }
+            }
+        }
+    }
+</style>

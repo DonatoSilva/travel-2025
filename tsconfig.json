@@ -5,7 +5,14 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@/*": ["./src/*"],
+      "@styles/*": ["./src/styles/*"],
       "@images/*": ["./src/assets/images/*"],
-    }
+      "@components/*": ["./src/components/*"],
+      "@memory/*": ["./src/components/memory/*"],
+      "@album/*": ["./src/components/memory/album/*"],
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   }
 }

@@ -1,0 +1,82 @@
+---
+interface Props {
+    id: string;
+    title: string;
+    description?: string;
+}
+
+const { id, title, description = "" } = Astro.props;
+---
+
+<modal-travel>
+    <dialog class="modal" id={id}>
+        <div class="modal-content flex flex-col gap-2">
+            <div class="modal-header">
+                <h2 class="text-2xl font-bold text-orange-600">{title}</h2>
+                <button
+                    class="close-modal px-4 py-2 rounded-lg bg-orange-600 text-white"
+                    >X</button
+                >
+            </div>
+            <div class="modal-body">
+                {description ? <p class="mb-8 mx-auto">{description}</p> : ""}
+                <slot />
+            </div>
+        </div>
+    </dialog>
+</modal-travel>
+
+<style>
+    .modal {
+        width: 100%;
+        height: fit-content;
+        padding: 20px 40px;
+        max-width: 750px;
+        max-height: 650px;
+        overscroll-behavior: contain;
+        @apply bg-orange-100 border-8 border-white rounded-2xl;
+
+        .modal-content {
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                box-sizing: border-box;
+                align-items: center;
+                gap: 12px;
+
+                .close-modal {
+                    transition: color 0.3s ease;
+                    transition: background-color 0.3s ease;
+
+                    &:hover {
+                        @apply bg-orange-50;
+                        @apply text-orange-600;
+                    }
+                }
+            }
+        }
+    }
+</style>
+
+<script>
+    class ModalTravel extends HTMLElement {
+        constructor() {
+            super();
+
+            const dialog = this.querySelector("dialog");
+            const close = dialog?.querySelector(".close-modal");
+
+            dialog?.addEventListener("click", (event) => {
+                if (event.target === dialog) {
+                    dialog.close();
+                }
+            });
+
+            close?.addEventListener("click", () => {
+                dialog?.close();
+            });
+        }
+    }
+
+    customElements.define("modal-travel", ModalTravel);
+</script>

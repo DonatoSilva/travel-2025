@@ -1,0 +1,209 @@
+---
+import Modal from "@components/Modal.astro";
+import { firebase } from "src/firebase/config";
+import { PreViewImagesContent } from "./PreViewImagesContent";
+import Button from "@components/Button.astro";
+
+const userCurrent = firebase.auth.currentUser;
+---
+
+<Modal
+    id="addMemoryModal"
+    title="Crea un recuerdo para siempre"
+    description={` ✨🥳 Felicidades ${userCurrent?.displayName}, estas a poco de publicar tu primer recuerdo de la travel-2025. ¿Listo para compartirlo 🤔? `}
+>
+    <form class="flex flex-col gap-8">
+        <div class="headerForm">
+            <div class="flex flex-row items-end gap-4">
+                <label for="title" class="flex-1">
+                    Titulo
+                    <input
+                        id="title"
+                        type="text"
+                        name="title"
+                        placeholder="Titulo"
+                    />
+                </label>
+                <Button
+                    className="max-h-min disabled:opacity-80 disabled:cursor-progress"
+                    type="summit"
+                    id="btnAddMemory"
+                >
+                    Guardar
+                </Button>
+            </div>
+            <label for="description">
+                Descripción
+                <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Descripción (Opcional)"></textarea>
+            </label>
+        </div>
+        <PreViewImagesContent client:load />
+    </form>
+</Modal>
+
+<style>
+    .headerForm {
+        display: flex;
+        flex-direction: column;
+        @apply gap-4;
+
+        label {
+            display: flex;
+            color: transparent;
+            flex-direction: column;
+            transition: color 0.2s ease-in-out;
+            @apply gap-1;
+
+            input,
+            textarea {
+                &:focus {
+                    outline: none;
+                    border-radius: 0.5rem;
+                    @apply border border-orange-200 bg-white text-black;
+
+                    &::placeholder {
+                        color: transparent;
+                    }
+                }
+
+                &::placeholder {
+                    @apply text-orange-300;
+                }
+
+                border-bottom: 3px solid #fed7aa;
+                background-color: transparent;
+                color: #000;
+
+                padding: 0.5rem;
+                transition:
+                    border-radius 0.2s ease-in-out,
+                    border 0.2s ease-in-out,
+                    background-color 0.2s ease-in-out,
+                    color 0.2s ease-in-out;
+            }
+
+            textarea {
+                resize: none;
+                height: 5rem;
+            }
+        }
+
+        label:focus-within {
+            color: #000;
+            font-weight: 500;
+
+            input,
+            textarea {
+                font-weight: 400;
+            }
+        }
+    }
+</style>
+
+<script>
+    const modal = document.getElementById(
+        "addMemoryModal",
+    ) as HTMLDialogElement;
+    const fileInput = document.getElementById("file-input") as HTMLInputElement;
+    const btnAddMemory = document.getElementById(
+        "btnAddMemory",
+    ) as HTMLButtonElement;
+
+    const title = document.getElementById("title") as HTMLInputElement;
+    const description = document.getElementById(
+        "description",
+    ) as HTMLTextAreaElement;
+
+    import type { ImageFrontEnd as Image, Memory } from "@/interfaces";
+    import { addImgStore } from "@/store/memory/addStore";
+    import { actions } from "astro:actions";
+    import { navigate } from "astro:transitions/client";
+
+    btnAddMemory?.addEventListener("click", async (e) => {
+        e.preventDefault();
+        btnAddMemory.disabled = true;
+        btnAddMemory.textContent = "Guardando...";
+
+        const titleValue = title.value.trim();
+        const descriptionValue = description.value.trim();
+
+        if (titleValue === "") {
+            title.value = "";
+            title.focus();
+            alert("Por favor, ingresa un título para esta memoria.");
+            return;
+        }
+
+        const memoryData: Memory = {
+            title: titleValue ?? "",
+            description: descriptionValue ?? "",
+            images: [] as Image[],
+        };
+
+        const imgContainers = modal.querySelectorAll(".img-container");
+        imgContainers.forEach((imgContainer, key) => {
+            const p = imgContainer.querySelector("p") as HTMLParagraphElement;
+            const pIsEmpty = p.dataset.isempty;
+
+            if (!p) return;
+
+            const imgFile = addImgStore.get()[key];
+            const imgDescription = pIsEmpty ? "" : p.textContent!;
+
+            const dataImg: Image = {
+                file: imgFile,
+                description: imgDescription,
+            };
+
+            memoryData.images.push(dataImg);
+        });
+
+        const formdata = new FormData();
+        formdata.append("title", memoryData.title);
+        formdata.append("description", memoryData.description ?? "");
+
+        for (let img of memoryData.images) {
+            formdata.append("images", img.file);
+            formdata.append("imgDescription", img.description);
+        }
+
+        const { data, error } = await actions.Memory.addMemory(formdata);
+
+        if (error) {
+            console.error(error);
+            alert("Error al agregar la memoria.");
+            btnAddMemory.disabled = false;
+            btnAddMemory.textContent = "Guardar";
+            return;
+        }
+
+        btnAddMemory.disabled = false;
+        btnAddMemory.textContent = "Guardar";
+        modal?.close();
+        alert("Memoria agregada con éxito. Recargando página...");
+        navigate("");
+    });
+
+    title.addEventListener("blur", () => {
+        if (title.value.trim() === "") {
+            title.value = "";
+        }
+    });
+
+    description.addEventListener("blur", () => {
+        if (description.value.trim() === "") {
+            description.value = "";
+        }
+    });
+
+    modal?.addEventListener("close", (e) => {
+        fileInput.value = "";
+        title.value = "";
+        description.value = "";
+
+        addImgStore.set({} as FileList);
+    });
+</script>

@@ -1,0 +1,41 @@
+---
+import type { User } from "@/interfaces/memory/user";
+
+interface Props {
+    user: User;
+    className?: string;
+    isTemplate?: boolean;
+}
+
+const { user, className, isTemplate } = Astro.props;
+---
+
+<div
+    class={"px-3 py-2 bg-white rounded-lg z-10 flex flex-row gap-2 items-center justify-center UserPerfil" +
+        (className ? " " + className : "")}
+>
+    <div class="w-5 h-5 bg-orange-100 rounded-full overflow-hidden">
+        {
+            !isTemplate ? (
+                user ? (
+                    <img
+                        src={user.imgUrl ?? ""}
+                        alt={"User photo - " + (user.name ?? "Unknown")}
+                        loading="lazy"
+                    />
+                ) : (
+                    <div class="bg-orange-300" />
+                )
+            ) : (
+                <img
+                    src={""}
+                    alt={"User photo - " + "Unknown"}
+                    loading="lazy"
+                />
+            )
+        }
+    </div>
+    <div class="text-xs select-none userPerfilName">
+        {user ? user.name : "Unknown"}
+    </div>
+</div>

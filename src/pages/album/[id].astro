@@ -1,0 +1,381 @@
+---
+import CardFooter from "@/components/memory/album/card/CardFooter.astro";
+import Comment from "@/components/memory/album/Comment.astro";
+import CommentBox from "@/components/memory/album/CommentBox.astro";
+import UserPerfil from "@/components/memory/album/UserPerfil.astro";
+import Nav from "@/components/Nav.astro";
+import Layout from "@/layouts/Layout.astro";
+import { actions } from "astro:actions";
+import { db, and, eq, Like } from "astro:db";
+
+const id = Astro.params.id ?? "";
+
+const { data: album, error } = await Astro.callAction(
+    actions.Memory.getAlbumForID,
+    {
+        id: id.toString(),
+    },
+);
+
+if (error) {
+    console.log(error.message);
+    return Astro.redirect("/");
+}
+
+if (!album) {
+    return Astro.redirect("/404?album=notfound");
+}
+
+const { user, comments } = album;
+const likes = await db
+    .select()
+    .from(Like)
+    .where(and(eq(Like.albumId, id), eq(Like.userId, user.id)))
+    .limit(1);
+
+const isLiked = !!likes.length;
+---
+
+<Layout
+    title={"Travel-2025 - " + album.title}
+    description={"Mira el álbum de fotos de Travel-2025 | " + album.description}
+    img={album.photos[0].url}
+>
+    <header>
+        <Nav />
+    </header>
+    <section
+        class="bg-orange-100 text-black w-full max-w-screen-xl mx-auto rounded-xl overflow-hidden viewAlbum grid grid-cols-1 md:grid-cols-5 md:grid-rows-5 gap-2 min-h-[90dvh] md:max-h-[90dvh] border-4 border-white"
+    >
+        <article
+            class="relative rounded-b-md md:rounded-none overflow-hidden min-h-[450px] max-h-[450px] md:max-h-none md:col-span-3 md:row-span-5 p-2"
+        >
+            <div class="swiper mySwiper min-h-72 h-full">
+                <!-- Additional required wrapper -->
+                <div class="swiper-wrapper">
+                    <!-- Slides -->
+                    {
+                        album.photos.map((img) => (
+                            <div class="swiper-slide  relative">
+                                <img
+                                    class="h-full object-cover mx-auto rounded-md"
+                                    src={img.url.toString()}
+                                    alt={img.alt}
+                                />
+                                <span
+                                    class={
+                                        (img.description
+                                            ? ""
+                                            : "text-gray-400") +
+                                        " absolute bottom-8 left-1/2 -translate-x-1/2  bg-orange-100/70 px-4 py-2 border-s-4 border-orange-500 rounded-e-md hover:bg-orange-200 transition-colors w-fit max-w-80"
+                                    }
+                                >
+                                    {img.description || "Sin descripción"}
+                                </span>
+                            </div>
+                        ))
+                    }
+                </div>
+                <!-- If we need pagination -->
+                <div class="swiper-pagination"></div>
+
+                <!-- If we need navigation buttons -->
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+            </div>
+
+            <a
+                class="absolute top-4 left-4 z-50 flex flex-row gap-2 bg-orange-50 opacity-25 hover:opacity-100 transition-opacity px-2 py-1 rounded"
+                href="/"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    ><path
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.5"
+                        d="m15 19l-6-7l1.5-1.75M15 5l-2 2.333"></path></svg
+                > Regresar al inicio
+            </a>
+        </article>
+        <section
+            class="md:col-span-2 md:row-span-5 md:col-start-4 p-2 flex flex-col mx-2 gap-4 pt-4"
+        >
+            <header class="flex flex-row justify-between items-start gap-2">
+                <div>
+                    <h1 class="font-bold text-xl break-words">{album.title}</h1>
+                    <UserPerfil className=" w-fit" user={user} />
+                </div>
+                <span class="text-xs text-right"
+                    ><strong class="">Creado:</strong>
+                    {album.createdAt.toLocaleDateString()}</span
+                >
+            </header>
+            <div
+                class="flex flex-col gap-2 justify-end card-Album-body w-full min-h-32"
+            >
+                <p
+                    class="card-Album-text flex-1 bg-orange-50 rounded-md px-4 py-3 text-balance"
+                >
+                    {
+                        album.description ? (
+                            album.description
+                        ) : (
+                            <span class="text-gray-400 border-l ps-2 border-gray-400">
+                                Sin descripción
+                            </span>
+                        )
+                    }
+                </p>
+                <CardFooter
+                    id={id}
+                    likes={album.likes}
+                    comments={album.comments.length}
+                    shares={album.share}
+                    isLiked={isLiked}
+                    className="justify-end w-full"
+                />
+            </div>
+            <div class="flex flex-col gap-5 overflow-auto pr-2 h.full">
+                <header>
+                    <h2 class="font-bold text-xl mb-2">Comentarios</h2>
+                    <CommentBox albumId={id} />
+                </header>
+                <div
+                    id="comenntBody"
+                    class="flex flex-col gap-2 max-h-80 md:max-h-72"
+                >
+                    {
+                        !!comments.length ? (
+                            comments.map((comment) => (
+                                <Comment
+                                    commentId={comment.id}
+                                    userId={comment.userId}
+                                    content={comment.content}
+                                    createdAt={comment.createdAt}
+                                />
+                            ))
+                        ) : (
+                            <span
+                                class="text-gray-400 border-l ps-2 border-gray-400"
+                                id="commentEmpty"
+                            >
+                                ¡Este espacio está muy silencioso! 🤫 Rompe el
+                                hielo y deja tu huella aquí ✨
+                            </span>
+                        )
+                    }
+                </div>
+            </div>
+        </section>
+    </section>
+</Layout>
+
+<style>
+    body {
+        min-height: 100dvh;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+    }
+
+    .swiper-pagination {
+        color: #000;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .swiper-button-prev,
+    .swiper-button-next {
+        color: #fff;
+        &::after {
+            font-size: 45px;
+        }
+    }
+</style>
+
+<script>
+    // core version + navigation, pagination modules:
+    import Swiper from "swiper";
+    import { Navigation, Pagination } from "swiper/modules";
+    // import Swiper and modules styles
+    import "swiper/css";
+    import "swiper/css/navigation";
+    import "swiper/css/pagination";
+
+    const swiper = new Swiper(".mySwiper", {
+        modules: [Navigation, Pagination],
+
+        pagination: {
+            el: ".swiper-pagination",
+            type: "fraction",
+        },
+
+        navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+        },
+    });
+</script>
+
+<script>
+    import { firebase } from "@/firebase/config";
+    import type { Comment } from "@/interfaces";
+    import { showNotify } from "@/utils/popsNotification";
+    import { actions } from "astro:actions";
+
+    const commentEmpy = document.getElementById(
+        "commentEmpty",
+    ) as HTMLDivElement;
+    const commentBox = document.getElementById("commentBox") as HTMLDivElement;
+    const textArea = commentBox.querySelector(
+        "textarea",
+    ) as HTMLTextAreaElement;
+    const btnNewComment = commentBox.querySelector(
+        "button[type='button']",
+    ) as HTMLButtonElement;
+
+    const template = document.getElementById(
+        "templateComment",
+    ) as HTMLTemplateElement;
+    const commentBody = document.getElementById(
+        "comenntBody",
+    ) as HTMLDivElement;
+
+    const id = commentBox.dataset.id as string;
+
+    const reset = () => {
+        textArea.value = "";
+        textArea.disabled = false;
+        textArea.focus();
+
+        btnNewComment.disabled = false;
+    };
+
+    const formatDate = (date: Date) => {
+        const dateOptions: Intl.DateTimeFormatOptions = {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+        };
+
+        return date.toLocaleDateString("es-ES", dateOptions);
+    };
+
+    const addComment = (data: Comment) => {
+        const userCurrent = firebase.auth.currentUser;
+        const clone = template.content.cloneNode(true) as DocumentFragment;
+
+        // Function to update DOM
+        const updateDOM = () => {
+            const commentElement = clone.querySelector(
+                ".Comment",
+            ) as HTMLDivElement;
+            const commentContent = commentElement.querySelector(
+                ".commentContent",
+            ) as HTMLDivElement;
+            const commmentDate = commentElement.querySelector(
+                ".commentDate",
+            ) as HTMLSpanElement;
+
+            const UserPerfilElement = clone.querySelector(
+                ".UserPerfil",
+            ) as HTMLDivElement;
+            const userPerfilImg = UserPerfilElement.querySelector(
+                "img",
+            ) as HTMLImageElement;
+            const userPerfilName = UserPerfilElement.querySelector(
+                ".userPerfilName",
+            ) as HTMLSpanElement;
+
+            commentElement.dataset.id = data.id;
+
+            // Add view transition only if supported
+            if (typeof document.startViewTransition === "function") {
+                commentElement.style.viewTransitionName = `comment-${data.id}`;
+            }
+
+            commentContent.textContent = data.content;
+            commmentDate.textContent = formatDate(data.createdAt);
+
+            userPerfilImg.src = userCurrent?.photoURL ?? "";
+            userPerfilName.textContent = userCurrent?.displayName ?? "";
+
+            commentBody.prepend(commentElement);
+            commentEmpy.remove(); // Remove empty comment message
+            reset();
+        };
+
+        // Use View Transitions API if supported, otherwise update DOM directly
+        if (document.startViewTransition) {
+            document.startViewTransition(() => updateDOM());
+        } else {
+            updateDOM();
+        }
+    };
+
+    btnNewComment.addEventListener("click", async () => {
+        btnNewComment.disabled = true;
+        textArea.disabled = true;
+
+        const loginModal = document.getElementById(
+            "login-modal",
+        ) as HTMLDialogElement;
+        const comment = textArea.value.trim();
+        const userCurrent = firebase.auth.currentUser;
+
+        if (!userCurrent) {
+            showNotify("Debes iniciar sesión para comentar 🫥");
+            loginModal.showModal();
+            reset();
+            return;
+        }
+
+        if (!comment) {
+            showNotify("Debes tener algo por decir 🫥");
+            reset();
+            return;
+        }
+
+        const btnText = btnNewComment.querySelector(
+            ".btnText",
+        ) as HTMLSpanElement;
+
+        btnNewComment.classList.add("animate-pulse");
+        btnText.textContent = "Enviando...";
+
+        const { data, error } = await actions.Memory.addComment({
+            comment: comment,
+            albumId: id,
+        });
+
+        if (error) {
+            showNotify("Ha ocurrido un error al publicar tu comentario 🫥");
+            reset();
+
+            console.error(error.message);
+            return;
+        }
+
+        if (!data) return;
+
+        const status = data.status;
+        const message = data.body.message;
+
+        if (status !== 200) {
+            showNotify(message);
+            console.error(message);
+            return;
+        }
+
+        const insertedCommentData = data.body.commentData;
+        addComment(insertedCommentData!);
+
+        btnNewComment.classList.remove("animate-pulse");
+        btnText.textContent = "Enviar";
+    });
+</script>

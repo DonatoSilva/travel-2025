@@ -7,4 +7,3 @@ export default async function seed() {
 
     console.log('Seeding database...');
 }
-    
