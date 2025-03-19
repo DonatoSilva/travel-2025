@@ -17,7 +17,7 @@ const ACCEPTED_IMAGE_TYPES = [
 ];
 
 // 10MB
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE = 15 * 1024 * 1024;
 
 const ImageSchema = z.array(
     z.instanceof(File)
