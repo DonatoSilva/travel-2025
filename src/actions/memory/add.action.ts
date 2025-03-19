@@ -6,6 +6,7 @@ import { Album, db, eq, Photo, User, Comment } from 'astro:db'
 import { v4 as UUID } from 'uuid';
 import { firebase } from "@/firebase/config";
 import { imgUp } from "@/utils/ImageUp";
+import { log } from "node_modules/astro/dist/core/logger/core";
 // Esquema para la interfaz "Image"
 // accept=".jpg,.jpeg,.png,.webp"
 const ACCEPTED_IMAGE_TYPES = [
@@ -122,6 +123,7 @@ export const addMemory = defineAction({
                 },
             };
         } catch (error) {
+            console.error(error);
             throw error;
         }
     },
