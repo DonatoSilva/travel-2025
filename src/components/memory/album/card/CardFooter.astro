@@ -7,10 +7,19 @@ interface Props {
     comments: number;
     shares: number;
     isLiked: boolean;
+    isTemplate?: boolean;
     className?: string;
 }
 
-const { id, likes, comments, shares, isLiked, className } = Astro.props;
+const {
+    id,
+    likes,
+    comments,
+    shares,
+    isLiked,
+    isTemplate = false,
+    className,
+} = Astro.props;
 ---
 
 <card-album-footer
@@ -18,12 +27,18 @@ const { id, likes, comments, shares, isLiked, className } = Astro.props;
     data-id={id}
 >
     <div class="flex flex-row items-center gap-2 px-2">
-        <ButtonCardLike
-            isLiked={isLiked}
-            albumId={id}
-            likeValue={likes}
-            client:load
-        />
+        {
+            isTemplate ? (
+                <div id="btnLikes" />
+            ) : (
+                <ButtonCardLike
+                    albumId={id}
+                    likeValue={likes}
+                    isLiked={isLiked}
+                    client:visible
+                />
+            )
+        }
         <div class="h-4 w-[2px] bg-orange-300"></div>
         <span class="flex flex-row items-center gap-1 comment btn"
             ><svg
@@ -82,60 +97,3 @@ const { id, likes, comments, shares, isLiked, className } = Astro.props;
         }
     }
 </style>
-
-<script>
-    import { showNotify } from "@/utils/popsNotification";
-    import { actions } from "astro:actions";
-
-    class CardAlbumFooter extends HTMLElement {
-        constructor() {
-            super();
-
-            const id = this.getAttribute("data-id")?.valueOf();
-            const btnShareValue = this.querySelector(
-                ".share .value",
-            ) as HTMLSpanElement;
-            const btnShare = this.querySelector(".share") as HTMLSpanElement;
-
-            async function handleShare() {
-                try {
-                    showNotify("Compartiendo... 🚀");
-                    const shareData = {
-                        title: "Compartir álbum de Travel-2025",
-                        text: "¡Mira este increíble álbum de viajes!",
-                        url: window.location.href + "/album/" + id,
-                    };
-
-                    if (navigator.share) {
-                        await navigator.share(shareData);
-                        showNotify("¡Compartido con éxito! 🎉");
-                    } else {
-                        await navigator.clipboard.writeText(shareData.url);
-                        showNotify("¡Enlace copiado al portapapeles! 📋");
-                    }
-
-                    const { data, error } = await actions.Memory.addShare({
-                        albumId: id ?? "",
-                    });
-
-                    if (error) {
-                        console.error(
-                            `Error al compartir, album ${id}:`,
-                            error,
-                        );
-                    }
-
-                    const { newShare } = data?.body!;
-                    btnShareValue.textContent = newShare.toString();
-                } catch (err) {
-                    console.error("Error al compartir:", err);
-                    showNotify("Error al compartir el álbum. 😢");
-                }
-            }
-
-            btnShare?.addEventListener("click", handleShare);
-        }
-    }
-
-    customElements.define("card-album-footer", CardAlbumFooter);
-</script>

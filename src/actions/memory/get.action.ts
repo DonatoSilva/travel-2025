@@ -40,7 +40,7 @@ export const getAlbums = defineAction({
                 albumsCardData.push(albumCardData);
             }
 
-            return albumsCardData;
+            return albumsCardData.reverse();
         } catch (error) {
             throw error;
         }
@@ -63,7 +63,7 @@ export const getAlbumForID = defineAction({
 
             const user = await db.select().from(User).where(eq(User.id, album.userId)).then((result) => result[0]) as UserType;
             const photos = await db.select().from(Photo).where(eq(Photo.albumId, album.id)).all();
-            const comments = await db.select().from(Comment).where(eq(Comment.albumId, album.id)).all();
+            const comments = await (await db.select().from(Comment).where(eq(Comment.albumId, album.id))).reverse();
 
             const albumData: AlbumView = {
                 id: album.id,

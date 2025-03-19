@@ -4,13 +4,14 @@ import type { AlbumPreView, User as UserType } from "@/interfaces";
 import { and, db, eq, Like } from "astro:db";
 import CardFooter from "./CardFooter.astro";
 import UserPerfil from "../UserPerfil.astro";
+
 interface Props {
     id: string;
     album: AlbumPreView;
+    isTemplate?: boolean;
 }
 
-const { id, album } = Astro.props;
-
+const { id, album, isTemplate = false } = Astro.props;
 const user: UserType = album.user;
 
 const existUser = Astro.locals.userExists;
@@ -36,6 +37,7 @@ const isLiked = !!liked.length;
     <a
         href={"/album/" + id}
         class="card-Album w-full flex flex-col items-center justify-center gap-3 bg-orange-100 rounded-lg p-3 hover:shadow-lg transition-shadow duration-200 min-h-[432px]"
+        data-astro-reload
     >
         <div class="swiper mySwiper min-h-72">
             <!-- Additional required wrapper -->
@@ -58,6 +60,7 @@ const isLiked = !!liked.length;
             <UserPerfil
                 className="absolute top-2 left-2 opacity-85 hover:opacity-100 transition-opacity "
                 user={user}
+                isTemplate={isTemplate}
             />
         </div>
         <div
@@ -85,66 +88,11 @@ const isLiked = !!liked.length;
             comments={album.comments}
             shares={album.share}
             isLiked={isLiked}
+            isTemplate={isTemplate}
             className="justify-center max-w-min"
         />
     </a>
 </card-album>
-
-<script>
-    // core version + navigation, pagination modules:
-    import Swiper from "swiper";
-    import { Navigation, Pagination } from "swiper/modules";
-    // import Swiper and modules styles
-    import "swiper/css";
-    import "swiper/css/navigation";
-    import "swiper/css/pagination";
-
-    const swiper = new Swiper(".mySwiper", {
-        modules: [Navigation, Pagination],
-
-        pagination: {
-            el: ".swiper-pagination",
-            type: "fraction",
-        },
-
-        navigation: {
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev",
-        },
-    });
-</script>
-
-<script>
-    import { navigate } from "astro:transitions/client";
-
-    class CardAlbum extends HTMLElement {
-        constructor() {
-            super();
-            const aElement = this.querySelector("a") as HTMLAnchorElement;
-            const next = this.querySelector(".swiper-button-next");
-            const prev = this.querySelector(".swiper-button-prev");
-            const albumText = this.querySelector(".card-Album-text");
-            const albumFooter = this.querySelector(".card-Album-footer");
-
-            const noClickElements = [next, prev, albumText, albumFooter];
-
-            aElement.addEventListener("click", (e) => {
-                e.preventDefault();
-
-                if (
-                    noClickElements.some((elem) =>
-                        elem?.contains(e.target as Element),
-                    )
-                )
-                    return;
-
-                navigate(aElement.href);
-            });
-        }
-    }
-
-    customElements.define("card-album", CardAlbum);
-</script>
 
 <style>
     .swiper {
@@ -207,6 +155,25 @@ const isLiked = !!liked.length;
                     }
                 }
             }
+        }
+    }
+
+    .cardIn {
+        animation: blurIn 0.5s ease-out;
+    }
+
+    html::view-transition-group(card-album) {
+        animation-duration: 0.5s;
+    }
+
+    @keyframes blurIn {
+        0% {
+            filter: blur(12px);
+            opacity: 0;
+        }
+        100% {
+            filter: blur(0);
+            opacity: 1;
         }
     }
 </style>

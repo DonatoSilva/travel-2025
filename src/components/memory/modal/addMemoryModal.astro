@@ -104,6 +104,19 @@ const userCurrent = firebase.auth.currentUser;
 </style>
 
 <script>
+    import type {
+        AlbumPreView,
+        ImageBackEnd,
+        ImageFrontEnd as Image,
+        Memory,
+    } from "@/interfaces";
+    import { addImgStore } from "@/store/memory/addStore";
+    import { showNotify } from "@/utils/popsNotification";
+    import { actions } from "astro:actions";
+    import { createRoot } from "react-dom/client";
+    import ButtonLike from "../buttons/ButtonCardLike";
+    import React from "react";
+
     const modal = document.getElementById(
         "addMemoryModal",
     ) as HTMLDialogElement;
@@ -111,21 +124,124 @@ const userCurrent = firebase.auth.currentUser;
     const btnAddMemory = document.getElementById(
         "btnAddMemory",
     ) as HTMLButtonElement;
-
     const title = document.getElementById("title") as HTMLInputElement;
     const description = document.getElementById(
         "description",
     ) as HTMLTextAreaElement;
+    const templateCardAlbum = document.getElementById(
+        "templateCardAlbum",
+    ) as HTMLTemplateElement;
 
-    import type { ImageFrontEnd as Image, Memory } from "@/interfaces";
-    import { addImgStore } from "@/store/memory/addStore";
-    import { actions } from "astro:actions";
-    import { navigate } from "astro:transitions/client";
+    const updateDOM = (data: AlbumPreView) => {
+        const ContentAlbums = document.querySelector(
+            ".bodyGalery",
+        ) as HTMLDivElement;
+        const clone = templateCardAlbum.content.cloneNode(
+            true,
+        ) as DocumentFragment;
+        const cardAlbumCustomElement = clone.querySelector(
+            "card-album",
+        ) as HTMLElement;
+        const aElement = cardAlbumCustomElement.querySelector(
+            "a",
+        ) as HTMLAnchorElement;
+        const swiprWrapper = cardAlbumCustomElement.querySelector(
+            ".swiper-wrapper",
+        ) as HTMLElement;
+        const userPerfil = cardAlbumCustomElement.querySelector(
+            ".UserPerfil",
+        ) as HTMLElement;
+        const userPerfilName = cardAlbumCustomElement.querySelector(
+            ".userPerfilName",
+        ) as HTMLElement;
+        const userPerfilImg = cardAlbumCustomElement.querySelector(
+            "img",
+        ) as HTMLImageElement;
+        const cardAlbumText = cardAlbumCustomElement.querySelector(
+            ".card-Album-text",
+        ) as HTMLParagraphElement;
+        const noAlbumsMessage = document.getElementById(
+            "noAlbumsMessage",
+        ) as HTMLDivElement;
+        const cardFooter = cardAlbumCustomElement.querySelector(
+            "card-album-footer",
+        ) as HTMLElement;
+
+        if (
+            !cardAlbumCustomElement ||
+            !cardAlbumText ||
+            !swiprWrapper ||
+            !userPerfil ||
+            !userPerfilName ||
+            !userPerfilImg
+        )
+            return;
+
+        if (typeof document.startViewTransition === "function")
+            cardAlbumCustomElement.style.viewTransitionName = `comment-${data.id}`;
+
+        const { user, photos, description } = data;
+
+        const templateNoDescription = () => {
+            return `<span class="text-gray-400 border-l ps-2 border-gray-400">
+                        Sin descripción
+                    </span>`;
+        };
+        const templatImgSwiper = (img: ImageBackEnd) => {
+            return `<div class="swiper-slide">
+                        <img src="${img.url}" alt="${img.alt}" />
+                    </div>`;
+        };
+
+        cardAlbumCustomElement.classList.add("cardIn");
+        cardFooter.dataset.id = data.id;
+        swiprWrapper.innerHTML = photos
+            .map((img) => templatImgSwiper(img))
+            .join("");
+
+        cardAlbumText.innerHTML = description
+            ? description
+            : templateNoDescription();
+
+        userPerfilName.textContent = user.name;
+        userPerfilImg.src = user.imgUrl;
+
+        aElement.href = `/album/${data.id}`;
+        cardAlbumCustomElement.setAttribute("data-album-id", data.id);
+
+        ///agregar componente de react por medio de reactDOM.Render
+        const root = createRoot(
+            cardAlbumCustomElement.querySelector("#btnLikes")!,
+        );
+        root.render(
+            React.createElement(ButtonLike, {
+                albumId: data.id,
+                likeValue: data.likes,
+                isLiked: false,
+            }),
+        );
+
+        if (ContentAlbums.children.length > 1) {
+            ContentAlbums.insertBefore(
+                cardAlbumCustomElement,
+                ContentAlbums.children[1],
+            );
+        } else {
+            ContentAlbums.append(cardAlbumCustomElement);
+            noAlbumsMessage.remove();
+        }
+    };
+
+    const addCardAlbum = (data: AlbumPreView) => {
+        if (document.startViewTransition) {
+            document.startViewTransition(() => updateDOM(data));
+        } else {
+            updateDOM(data);
+        }
+    };
 
     btnAddMemory?.addEventListener("click", async (e) => {
         e.preventDefault();
-        btnAddMemory.disabled = true;
-        btnAddMemory.textContent = "Guardando...";
 
         const titleValue = title.value.trim();
         const descriptionValue = description.value.trim();
@@ -136,6 +252,11 @@ const userCurrent = firebase.auth.currentUser;
             alert("Por favor, ingresa un título para esta memoria.");
             return;
         }
+
+        title.disabled = true;
+        description.disabled = true;
+        btnAddMemory.disabled = true;
+        btnAddMemory.textContent = "Guardando...";
 
         const memoryData: Memory = {
             title: titleValue ?? "",
@@ -174,17 +295,34 @@ const userCurrent = firebase.auth.currentUser;
 
         if (error) {
             console.error(error);
-            alert("Error al agregar la memoria.");
+            showNotify(`Error 😥😔: ${error.message}`);
+            title.disabled = false;
+            description.disabled = false;
             btnAddMemory.disabled = false;
             btnAddMemory.textContent = "Guardar";
             return;
         }
 
+        if (!data || !data.body || !data.body.albumData) {
+            showNotify(
+                "Error 😥😔: al mostrar el álbum despues de su creación",
+            );
+            title.disabled = false;
+            description.disabled = false;
+            btnAddMemory.disabled = false;
+            btnAddMemory.textContent = "Guardar";
+            return;
+        }
+
+        console.log(data);
+
+        title.disabled = false;
+        description.disabled = false;
         btnAddMemory.disabled = false;
         btnAddMemory.textContent = "Guardar";
         modal?.close();
-        alert("Memoria agregada con éxito. Recargando página...");
-        navigate("");
+        showNotify("Memoria agregada con éxito.");
+        addCardAlbum(data.body.albumData);
     });
 
     title.addEventListener("blur", () => {

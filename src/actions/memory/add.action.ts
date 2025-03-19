@@ -1,5 +1,5 @@
 import { defineAction } from "astro:actions";
-import type { AlbumPreView, Comment as CommentType, ImageBackEnd as Image } from "@/interfaces";
+import type { Comment as CommentType, ImageBackEnd as Image } from "@/interfaces";
 import { z } from "astro:schema";
 
 import { Album, db, eq, Photo, User, Comment } from 'astro:db'
@@ -53,6 +53,13 @@ export const addMemory = defineAction({
             };
         }
 
+        const userData = {
+            imgUrl: user.photoURL || '',
+            name: user.displayName || '',
+            id: user.uid
+        }
+
+
         if (!title || !images || !imgDescription) {
             return {
                 ok: false,
@@ -68,12 +75,9 @@ export const addMemory = defineAction({
 
             const userInDB = await db.select().from(User).where(eq(User.id, user.uid));
 
+
             if (userInDB.length === 0) {
-                queries.push(db.insert(User).values([{
-                    imgUrl: user.photoURL || '',
-                    name: user.displayName || '',
-                    id: user.uid
-                }]));
+                queries.push(db.insert(User).values([userData]));
             }
 
             const newAlbumData = {
@@ -114,6 +118,7 @@ export const addMemory = defineAction({
                 status: 200,
                 body: {
                     message: "Memory added successfully",
+                    albumData: { ...newAlbumData, photos: imagesData, comments: 0, user: userData },
                 },
             };
         } catch (error) {

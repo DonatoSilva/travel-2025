@@ -23,9 +23,23 @@ if (error) {
 }
 
 const isInveted = dataInvited?.isInvited;
-console.log(isInveted, userExists);
 
 const albums: AlbumPreView[] = data!;
+
+const albumTemplate: AlbumPreView = {
+    id: "",
+    description: "",
+    createdAt: new Date(),
+    photos: [],
+    likes: 0,
+    comments: 0,
+    share: 0,
+    user: {
+        id: "",
+        name: "",
+        imgUrl: "",
+    },
+};
 ---
 
 <section
@@ -52,6 +66,7 @@ const albums: AlbumPreView[] = data!;
                             `${!userExists ? "lg:col-span-full" : "lg:col-span-1"}` +
                             " text-center flex flex-col justify-center items-center h-full col-span-full md:col-span-2  text-gray-400  min-h-60 "
                         }
+                        id="noAlbumsMessage"
                     >
                         <p class="text-2xl font-bold  mx-auto  ">
                             No hay albums
@@ -70,6 +85,10 @@ const albums: AlbumPreView[] = data!;
         </ContentAlbums>
     </div>
 </section>
+
+<template id="templateCardAlbum">
+    <Card id="" album={albumTemplate} isTemplate={true} />
+</template>
 
 <style>
     .gallery {
@@ -135,3 +154,117 @@ const albums: AlbumPreView[] = data!;
         }
     }
 </style>
+
+<script>
+    import { navigate } from "astro:transitions/client";
+    import Swiper from "swiper";
+    import { Navigation, Pagination } from "swiper/modules";
+    // import Swiper and modules styles
+    import "swiper/css";
+    import "swiper/css/navigation";
+    import "swiper/css/pagination";
+
+    class CardAlbum extends HTMLElement {
+        constructor() {
+            super();
+            const swiper = new Swiper(".mySwiper", {
+                modules: [Navigation, Pagination],
+
+                pagination: {
+                    el: ".swiper-pagination",
+                    type: "fraction",
+                },
+
+                navigation: {
+                    nextEl: ".swiper-button-next",
+                    prevEl: ".swiper-button-prev",
+                },
+            });
+            const aElement = this.querySelector("a") as HTMLAnchorElement;
+            const next = this.querySelector(".swiper-button-next");
+            const prev = this.querySelector(".swiper-button-prev");
+            const albumText = this.querySelector(".card-Album-text");
+            const albumFooter = this.querySelector(".card-Album-footer");
+
+            const noClickElements = [next, prev, albumText, albumFooter];
+
+            aElement.addEventListener("click", (e) => {
+                e.preventDefault();
+
+                if (
+                    noClickElements.some((elem) =>
+                        elem?.contains(e.target as Element),
+                    )
+                )
+                    return;
+
+                navigate(aElement.href);
+            });
+        }
+    }
+
+    customElements.define("card-album", CardAlbum);
+</script>
+
+<script>
+    import { showNotify } from "@/utils/popsNotification";
+    import { actions } from "astro:actions";
+
+    class CardAlbumFooter extends HTMLElement {
+        constructor() {
+            super();
+
+            const id = this.getAttribute("data-id")?.valueOf();
+            const btnShareValue = this.querySelector(
+                ".share .value",
+            ) as HTMLSpanElement;
+            const btnShare = this.querySelector(".share") as HTMLSpanElement;
+
+            async function handleShare() {
+                try {
+                    showNotify("Compartiendo... 🚀");
+                    const shareData = {
+                        title: "Compartir álbum de Travel-2025",
+                        text: "¡Mira este increíble álbum de viajes!",
+                        url: window.location.href + "/album/" + id,
+                    };
+
+                    if (navigator.share) {
+                        await navigator.share(shareData);
+                        showNotify("¡Compartido con éxito! 🎉");
+                    } else {
+                        await navigator.clipboard.writeText(shareData.url);
+                        showNotify("¡Enlace copiado al portapapeles! 📋");
+                    }
+
+                    console.log("antes de la solicitud");
+
+                    const { data, error } = await actions.Memory.addShare({
+                        albumId: id ?? "",
+                    });
+
+                    console.log("despues de la solicitud");
+
+                    if (error) {
+                        console.error(
+                            `Error al compartir, album ${id}:`,
+                            error,
+                        );
+                    }
+
+                    console.log("data", data);
+
+                    const { newShare } = data?.body!;
+                    btnShareValue.textContent = newShare.toString();
+                } catch (err) {
+                    console.error("Error al compartir:", err);
+                    showNotify("Error al compartir el álbum. 😢");
+                }
+            }
+
+            btnShare?.addEventListener("click", handleShare);
+        }
+    }
+
+    customElements.define("card-album-footer", CardAlbumFooter);
+</script>
