@@ -25,7 +25,7 @@ export const uploadImage = defineAction({
     handler: async ({ image }) => {
         try {
             const imageUrl = await imgUp.update('', image);
-            
+
             if (!imageUrl) {
                 return {
                     ok: false,
@@ -74,8 +74,9 @@ export const addMemory = defineAction({
     }),
     handler: async ({ title, description, imageUrls, imgDescription }) => {
         const user = firebase.auth.currentUser;
+        const userExists = !!user
 
-        if (!user) {
+        if (!userExists) {
             return {
                 ok: false,
                 status: 401,
