@@ -14,13 +14,12 @@ export const handleLikeDislike = defineAction({
         albumId: z.string(),
     }),
     handler: async ({ albumId }) => {
-        const user = firebase.auth.currentUser;
-
-        if (!user) {
-            throw new Error('User not authenticated');
-        }
-
         try {
+            const user = firebase.auth.currentUser;
+
+            if (!user) {
+                throw new Error('User not authenticated');
+            }
             const existUser = await db.select().from(User).where(eq(User.id, user.uid));
 
             const albumData = await db.select().from(Album).where(eq(Album.id, albumId)).limit(1);

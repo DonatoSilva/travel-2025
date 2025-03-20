@@ -24,6 +24,19 @@ export const uploadImage = defineAction({
     }),
     handler: async ({ image }) => {
         try {
+            const user = firebase.auth.currentUser;
+            const userExists = !!user
+
+            if (!userExists) {
+                return {
+                    ok: false,
+                    status: 401,
+                    body: {
+                        message: "Unauthorized",
+                    },
+                };
+            }
+
             const imageUrl = await imgUp.update('', image);
 
             if (!imageUrl) {
@@ -73,36 +86,35 @@ export const addMemory = defineAction({
         imgDescription: z.array(z.string()),
     }),
     handler: async ({ title, description, imageUrls, imgDescription }) => {
-        const user = firebase.auth.currentUser;
-        const userExists = !!user
-
-        if (!userExists) {
-            return {
-                ok: false,
-                status: 401,
-                body: {
-                    message: "Unauthorized",
-                },
-            };
-        }
-
-        const userData = {
-            imgUrl: user.photoURL || '',
-            name: user.displayName || '',
-            id: user.uid
-        }
-
-        if (!title || !imageUrls || !imgDescription) {
-            return {
-                ok: false,
-                status: 400,
-                body: {
-                    message: "Missing fields",
-                },
-            };
-        }
-
         try {
+            const user = firebase.auth.currentUser;
+            const userExists = !!user
+
+            if (!userExists) {
+                return {
+                    ok: false,
+                    status: 401,
+                    body: {
+                        message: "Unauthorized",
+                    },
+                };
+            }
+
+            const userData = {
+                imgUrl: user.photoURL || '',
+                name: user.displayName || '',
+                id: user.uid
+            }
+
+            if (!title || !imageUrls || !imgDescription) {
+                return {
+                    ok: false,
+                    status: 400,
+                    body: {
+                        message: "Missing fields",
+                    },
+                };
+            }
             const queries: any = [];
 
             const userInDB = await db.select().from(User).where(eq(User.id, user.uid));
@@ -167,6 +179,7 @@ export const addComment = defineAction({
     handler: async ({ albumId, comment }) => {
         try {
             const album = await db.select().from(Album).where(eq(Album.id, albumId)).limit(1);
+
             if (!album.length) {
                 return {
                     ok: false,
@@ -178,7 +191,9 @@ export const addComment = defineAction({
             }
 
             const user = firebase.auth.currentUser;
-            if (!user) {
+            const userExists = !!user
+
+            if (!userExists) {
                 return {
                     ok: false,
                     status: 401,
