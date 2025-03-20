@@ -269,6 +269,7 @@ const userCurrent = firebase.auth.currentUser;
                 const p = imgContainer.querySelector(
                     "p",
                 ) as HTMLParagraphElement;
+
                 if (!p) return;
 
                 const pIsEmpty = p.dataset.isempty;
@@ -336,6 +337,8 @@ const userCurrent = firebase.auth.currentUser;
                 showNotify(
                     "Error 😥😔: al mostrar el álbum después de su creación",
                 );
+                console.log(data);
+
                 title.disabled = false;
                 description.disabled = false;
                 btnAddMemory.disabled = false;
