@@ -1,47 +1,78 @@
 import { defineAction } from "astro:actions";
 import type { Comment as CommentType, ImageBackEnd as Image } from "@/interfaces";
 import { z } from "astro:schema";
+import { imgUp } from "@/utils/ImageUp";
 
 import { Album, db, eq, Photo, User, Comment } from 'astro:db'
 import { v4 as UUID } from 'uuid';
 import { firebase } from "@/firebase/config";
-import { imgUp } from "@/utils/ImageUp";
-import { log } from "node_modules/astro/dist/core/logger/core";
-// Esquema para la interfaz "Image"
-// accept=".jpg,.jpeg,.png,.webp"
-const ACCEPTED_IMAGE_TYPES = [
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
-    "image/webp",
-];
 
-// 10MB
-const MAX_FILE_SIZE = 15 * 1024 * 1024;
+// Define max file size: 4.5MB
+const MAX_FILE_SIZE = 4.5 * 1024 * 1024;
 
-const ImageSchema = z.array(
-    z.instanceof(File)
-        .refine((file) => {
-            return ACCEPTED_IMAGE_TYPES.includes(file.type);
-        }, {
-            message: "Invalid image type",
-        })
-        .refine((file) => {
-            return file.size <= MAX_FILE_SIZE;
-        }, {
-            message: "Invalid image size",
-        })
+// Add file upload action with size validation
+export const uploadImage = defineAction({
+    accept: 'form',
+    input: z.object({
+        image: z.instanceof(File)
+            .refine(file => file.type.startsWith('image/'), {
+                message: 'File must be an image'
+            })
+            .refine(file => file.size <= MAX_FILE_SIZE, {
+                message: `Image size should not exceed 4.5MB`
+            })
+    }),
+    handler: async ({ image }) => {
+        try {
+            const imageUrl = await imgUp.update('', image);
+            
+            if (!imageUrl) {
+                return {
+                    ok: false,
+                    status: 500,
+                    body: {
+                        message: "Failed to upload image",
+                    },
+                };
+            }
+
+            return {
+                ok: true,
+                status: 200,
+                body: {
+                    message: "Image uploaded successfully",
+                    imageUrl,
+                },
+            };
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            return {
+                ok: false,
+                status: 500,
+                body: {
+                    message: "Error uploading image",
+                    error: error instanceof Error ? error.message : String(error),
+                },
+            };
+        }
+    },
+});
+
+const ImageUrlSchema = z.array(
+    z.string().url({
+        message: "Invalid image URL",
+    })
 );
 
 export const addMemory = defineAction({
-    accept: 'form',
+    accept: 'json', // Changed from 'form' to 'json'
     input: z.object({
         title: z.string(),
         description: z.string().optional(),
-        images: ImageSchema,
+        imageUrls: ImageUrlSchema, // Changed from images to imageUrls
         imgDescription: z.array(z.string()),
     }),
-    handler: async ({ title, description, images, imgDescription }) => {
+    handler: async ({ title, description, imageUrls, imgDescription }) => {
         const user = firebase.auth.currentUser;
 
         if (!user) {
@@ -60,8 +91,7 @@ export const addMemory = defineAction({
             id: user.uid
         }
 
-
-        if (!title || !images || !imgDescription) {
+        if (!title || !imageUrls || !imgDescription) {
             return {
                 ok: false,
                 status: 400,
@@ -75,7 +105,6 @@ export const addMemory = defineAction({
             const queries: any = [];
 
             const userInDB = await db.select().from(User).where(eq(User.id, user.uid));
-
 
             if (userInDB.length === 0) {
                 queries.push(db.insert(User).values([userData]));
@@ -93,20 +122,17 @@ export const addMemory = defineAction({
 
             queries.push(db.insert(Album).values(newAlbumData));
 
-            const imagesData: Image[] = await Promise.all(
-                images.map(async (image, index) => {
-                    const url = await imgUp.update('', image);
-
-                    return {
-                        id: UUID(),
-                        url: url,
-                        alt: `imagen correspondiente al album memorys de la ruta Travel-2025, del usuario ${user.displayName}`,
-                        type: image.type,
-                        description: imgDescription[index],
-                        albumId: newAlbumData.id,
-                    }
-                })
-            );
+            // Modified to use URLs directly instead of uploading files
+            const imagesData: Image[] = imageUrls.map((url, index) => {
+                return {
+                    id: UUID(),
+                    url: url,
+                    alt: `imagen correspondiente al album memorys de la ruta Travel-2025, del usuario ${user.displayName}`,
+                    type: 'image/' + url.split(".").reverse()[0],
+                    description: imgDescription[index],
+                    albumId: newAlbumData.id,
+                }
+            });
 
             imagesData.forEach((image) => {
                 queries.push(db.insert(Photo).values(image));
@@ -128,6 +154,7 @@ export const addMemory = defineAction({
         }
     },
 })
+
 
 /// agregar un commentario a la base de datos Comment
 export const addComment = defineAction({

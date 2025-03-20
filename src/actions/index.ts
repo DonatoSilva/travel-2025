@@ -1,5 +1,5 @@
 import { login, logOut } from "./auth/index.action"
-import { addMemory, addShare, getAlbums, getAlbumForID, handleLikeDislike, addComment } from "./memory"
+import { addMemory, addShare, getAlbums, getAlbumForID, handleLikeDislike, addComment, uploadImage } from "./memory"
 import { add } from "./subscribe"
 import { isInvited, get } from "./invited"
 
@@ -19,6 +19,7 @@ export const server = {
         addMemory,
         addComment,
         addShare,
+        uploadImage,
         getAlbums,
         handleLikeDislike,
         getAlbumForID

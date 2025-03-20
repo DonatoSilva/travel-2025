@@ -240,6 +240,7 @@ const userCurrent = firebase.auth.currentUser;
         }
     };
 
+    // Modified click handler for btnAddMemory
     btnAddMemory?.addEventListener("click", async (e) => {
         e.preventDefault();
 
@@ -258,73 +259,119 @@ const userCurrent = firebase.auth.currentUser;
         btnAddMemory.disabled = true;
         btnAddMemory.textContent = "Guardando...";
 
-        const memoryData: Memory = {
-            title: titleValue ?? "",
-            description: descriptionValue ?? "",
-            images: [] as Image[],
-        };
+        try {
+            // Collect image files and descriptions
+            const imgContainers = modal.querySelectorAll(".img-container");
+            const imageFiles: File[] = [];
+            const imageDescriptions: string[] = [];
 
-        const imgContainers = modal.querySelectorAll(".img-container");
-        imgContainers.forEach((imgContainer, key) => {
-            const p = imgContainer.querySelector("p") as HTMLParagraphElement;
-            const pIsEmpty = p.dataset.isempty;
+            imgContainers.forEach((imgContainer, key) => {
+                const p = imgContainer.querySelector(
+                    "p",
+                ) as HTMLParagraphElement;
+                if (!p) return;
 
-            if (!p) return;
+                const pIsEmpty = p.dataset.isempty;
+                const imgFile = addImgStore.get()[key];
+                const imgDescription = pIsEmpty ? "" : p.textContent!;
 
-            const imgFile = addImgStore.get()[key];
-            const imgDescription = pIsEmpty ? "" : p.textContent!;
+                if (imgFile) {
+                    imageFiles.push(imgFile);
+                    imageDescriptions.push(imgDescription);
+                }
+            });
 
-            const dataImg: Image = {
-                file: imgFile,
-                description: imgDescription,
-            };
+            if (imageFiles.length === 0) {
+                showNotify("Por favor, agrega al menos una imagen.");
+                title.disabled = false;
+                description.disabled = false;
+                btnAddMemory.disabled = false;
+                btnAddMemory.textContent = "Guardar";
+                return;
+            }
 
-            memoryData.images.push(dataImg);
-        });
+            // Upload all images in parallel
+            showNotify("Subiendo imágenes...");
+            const imageUploadPromises = imageFiles.map(async (file) => {
+                const formData = new FormData();
+                formData.append("image", file);
 
-        const formdata = new FormData();
-        formdata.append("title", memoryData.title);
-        formdata.append("description", memoryData.description ?? "");
+                const { data, error } =
+                    await actions.Memory.uploadImage(formData);
 
-        for (let img of memoryData.images) {
-            formdata.append("images", img.file);
-            formdata.append("imgDescription", img.description);
-        }
+                if (error || !data) {
+                    throw new Error(
+                        error?.message || "Error al subir la imagen",
+                    );
+                }
 
-        const { data, error } = await actions.Memory.addMemory(formdata);
+                return data.body.imageUrl;
+            });
 
-        if (error) {
-            console.error(error);
-            showNotify(`Error 😥😔: ${error.message}`);
+            const imageUrls = await Promise.all(imageUploadPromises);
+
+            if (
+                imageUrls.length !== imageFiles.length ||
+                imageUrls.some((url) => !url)
+            ) {
+                showNotify("Error al subir todas las imágenes.");
+                title.disabled = false;
+                description.disabled = false;
+                btnAddMemory.disabled = false;
+                btnAddMemory.textContent = "Guardar";
+                return;
+            }
+
+            // Now send the memory data with image URLs
+            showNotify("Guardando memoria...");
+            const { data, error } = await actions.Memory.addMemory({
+                title: titleValue,
+                description: descriptionValue,
+                imageUrls: imageUrls as string[],
+                imgDescription: imageDescriptions,
+            });
+
+            if (error) {
+                console.error(error);
+                showNotify(`Error 😥😔: ${error.message}`);
+                title.disabled = false;
+                description.disabled = false;
+                btnAddMemory.disabled = false;
+                btnAddMemory.textContent = "Guardar";
+                return;
+            }
+
+            if (!data || !data.body || !data.body.albumData) {
+                showNotify(
+                    "Error 😥😔: al mostrar el álbum después de su creación",
+                );
+                title.disabled = false;
+                description.disabled = false;
+                btnAddMemory.disabled = false;
+                btnAddMemory.textContent = "Guardar";
+                return;
+            }
+
             title.disabled = false;
             description.disabled = false;
             btnAddMemory.disabled = false;
             btnAddMemory.textContent = "Guardar";
-            return;
-        }
-
-        if (!data || !data.body || !data.body.albumData) {
+            modal?.close();
+            showNotify("Memoria agregada con éxito.");
+            addCardAlbum(data.body.albumData);
+        } catch (error) {
+            console.error(error);
             showNotify(
-                "Error 😥😔: al mostrar el álbum despues de su creación",
+                `Error: ${error instanceof Error ? error.message : "Error desconocido"}`,
             );
             title.disabled = false;
             description.disabled = false;
             btnAddMemory.disabled = false;
             btnAddMemory.textContent = "Guardar";
-            return;
         }
-
-        console.log(data);
-
-        title.disabled = false;
-        description.disabled = false;
-        btnAddMemory.disabled = false;
-        btnAddMemory.textContent = "Guardar";
-        modal?.close();
-        showNotify("Memoria agregada con éxito.");
-        addCardAlbum(data.body.albumData);
     });
 
+    // Existing event listeners
     title.addEventListener("blur", () => {
         if (title.value.trim() === "") {
             title.value = "";
