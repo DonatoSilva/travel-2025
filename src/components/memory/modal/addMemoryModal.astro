@@ -281,15 +281,6 @@ const userCurrent = firebase.auth.currentUser;
                 }
             });
 
-            if (imageFiles.length === 0) {
-                showNotify("Por favor, agrega al menos una imagen.");
-                title.disabled = false;
-                description.disabled = false;
-                btnAddMemory.disabled = false;
-                btnAddMemory.textContent = "Guardar";
-                return;
-            }
-
             // Upload all images in parallel
             showNotify("Subiendo imágenes...");
             const imageUploadPromises = imageFiles.map(async (file) => {
@@ -341,7 +332,7 @@ const userCurrent = firebase.auth.currentUser;
                 return;
             }
 
-            if (!data || !data.body || !data.body.albumData) {
+            if (data.status != 200) {
                 showNotify(
                     "Error 😥😔: al mostrar el álbum después de su creación",
                 );
@@ -358,7 +349,7 @@ const userCurrent = firebase.auth.currentUser;
             btnAddMemory.textContent = "Guardar";
             modal?.close();
             showNotify("Memoria agregada con éxito.");
-            addCardAlbum(data.body.albumData);
+            addCardAlbum(data.body.albumData!);
         } catch (error) {
             console.error(error);
             showNotify(
