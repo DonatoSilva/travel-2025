@@ -35,7 +35,7 @@ export class chunkImage {
      */
     static async saveChunk(chunk, fileName, chunkIndex, totalChunks) {
         try {
-            const miArray = Array.from({ length: cantidad }, (_, index) => `${fileName}${index + 1}`);
+            const miArray = Array.from({ length: totalChunks }, (_, index) => `${fileName}${index + 1}`);
             const tempDir = path.join("uploads", fileName);
             const chunkFilePath = path.join(tempDir, `${fileName}-${chunkIndex}`);
 
@@ -45,7 +45,7 @@ export class chunkImage {
 
             fs.writeFileSync(chunkFilePath, Buffer.from(chunk));
 
-            if (miArray.length === totalChunks) {
+            if (miArray.length === chunkIndex) {
                 return { status: 200, fileName, message: "Image saved successfully" };
             }
 
