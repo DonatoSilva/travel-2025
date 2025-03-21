@@ -1,4 +1,4 @@
-import { defineAction } from "astro:actions";
+import { ActionError, defineAction } from "astro:actions";
 import type { Comment as CommentType, ImageBackEnd as Image } from "@/interfaces";
 import { z } from "astro:schema";
 import { imgUp } from "@/utils/ImageUp";
@@ -6,36 +6,66 @@ import { imgUp } from "@/utils/ImageUp";
 import { Album, db, eq, Photo, User, Comment } from 'astro:db'
 import { v4 as UUID } from 'uuid';
 import { firebase } from "@/firebase/config";
+import { chunkImage } from "@/utils/chunkImage";
 
 // Define max file size: 4.5MB
-const MAX_FILE_SIZE = 4.5 * 1024 * 1024;
+const MAX_FILE_SIZE = 3 * 1024 * 1024;
+
+// Define valid types 
+const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
 
 // Add file upload action with size validation
 export const uploadImage = defineAction({
     accept: 'form',
     input: z.object({
-        image: z.instanceof(File)
-            .refine(file => file.type.startsWith('image/'), {
-                message: 'File must be an image'
-            })
-            .refine(file => file.size <= MAX_FILE_SIZE, {
-                message: `Image size should not exceed 4.5MB`
-            })
+        chunk: z.instanceof(ArrayBuffer).refine((data) => data.byteLength <= MAX_FILE_SIZE, {
+            message: `File size must be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB`
+        }),
+        filename: z.string().nonempty(),
+        type: z.string(),
+        chunkIndex: z.number(),
+        totalChunks: z.number(),
     }),
-    handler: async ({ image }) => {
+    handler: async ({ chunk, filename, type, chunkIndex, totalChunks }) => {
         try {
             const user = firebase.auth.currentUser;
             const userExists = !!user
 
             if (!userExists) {
+                throw new ActionError({ code: 'UNAUTHORIZED', message: 'user unauthorized' });
+            }
+
+            if (!validTypes.includes(type)) {
+                throw new ActionError({ code: 'BAD_REQUEST', message: 'Invalid file type' });
+            }
+
+            const chunksImage = await chunkImage.saveChunk(chunk, filename, chunkIndex, totalChunks);
+
+            if (!chunksImage) {
+                throw new Error("Failed to upload image");
+            }
+
+            if (chunksImage === 202) {
                 return {
-                    ok: false,
-                    status: 401,
+                    ok: true,
+                    status: 200,
                     body: {
-                        message: "Unauthorized",
+                        message: `chunk-${chunkIndex} uploaded successfully`,
                     },
                 };
             }
+
+            const combinedBuffer = await chunkImage.mergeChunks(filename);
+
+            if (!combinedBuffer) {
+                throw new Error("Failed to merge image chunks");
+            }
+
+            const typeImage = type
+
+            const blob = new Blob([combinedBuffer], { type: typeImage });
+
+            const image = new File([blob], filename, { type: typeImage });
 
             const imageUrl = await imgUp.update('', image);
 
