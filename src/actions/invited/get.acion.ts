@@ -13,7 +13,7 @@ const invitations = [
     },
     {
         name: "Esteban David Reyes Chaparro",
-        email: "Estebandavidreyes@gmail.com",
+        email: "estebandavidreyes@gmail.com",
     },
     {
         name: "Angie Calorina Delgado Rondón",
