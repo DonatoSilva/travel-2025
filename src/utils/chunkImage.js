@@ -5,7 +5,7 @@ export class chunkImage {
     /**
      * @param {File} file
      * @param {number} chunkSize
-     * @return {ArrayBuffer}
+     * @return {ArrayBuffer[]}
      */
     static async divideImageInChunks(file, chunkSize) {
         try {
@@ -35,20 +35,21 @@ export class chunkImage {
      */
     static async saveChunk(chunk, fileName, chunkIndex, totalChunks) {
         try {
+            console.log("fileName", fileName, "saveChunk");
             const miArray = Array.from({ length: totalChunks }, (_, index) => `${fileName}${index + 1}`);
             const tempDir = path.join("uploads", fileName);
             const chunkFilePath = path.join(tempDir, `${fileName}-${chunkIndex}`);
 
-            if (!fs.existsSync(tempDir)) {
-                fs.mkdirSync(tempDir);
-            }
+            fs.mkdirSync(tempDir, { recursive: true });
 
             fs.writeFileSync(chunkFilePath, Buffer.from(chunk));
 
-            if (miArray.length === chunkIndex) {
+            console.log("validacion", miArray.length, chunkIndex);
+            if (miArray.length - 1 === chunkIndex) {
                 return { status: 200, fileName, message: "Image saved successfully" };
             }
 
+            console.log("chunks", chunkIndex, "of", totalChunks, "saved");
             return 202;
         } catch (error) {
             console.error("Error saving chunk:", error);
@@ -62,6 +63,8 @@ export class chunkImage {
      */
     static async mergeChunks(fileName) {
         try {
+            console.log("fileName", fileName, "mergeChunks");
+
             const tempDir = path.join("uploads", fileName);
 
             const chunkFiles = fs.readdirSync(tempDir)
@@ -76,14 +79,13 @@ export class chunkImage {
                 fs.unlinkSync(chunkPath);
             });
 
-            fs.rmdirSync(tempDir);
-
             const combinedBuffer = Buffer.concat(buffers);
-
             return combinedBuffer;
         } catch (error) {
             console.error("Error merging chunks:", error);
             throw error;
+        } finally {
+            fs.rmdirSync(path.join("uploads", fileName), { recursive: true });
         }
     }
 }

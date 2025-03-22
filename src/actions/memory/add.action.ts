@@ -18,7 +18,7 @@ const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
 export const uploadImage = defineAction({
     accept: 'form',
     input: z.object({
-        chunk: z.instanceof(ArrayBuffer).refine((data) => data.byteLength <= MAX_FILE_SIZE, {
+        chunk: z.instanceof(Blob).refine((data) => data.size <= MAX_FILE_SIZE, {
             message: `File size must be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB`
         }),
         filename: z.string().nonempty(),
@@ -29,17 +29,19 @@ export const uploadImage = defineAction({
     handler: async ({ chunk, filename, type, chunkIndex, totalChunks }) => {
         try {
             const user = firebase.auth.currentUser;
-            const userExists = !!user
+            const userExists = !!user;
 
             if (!userExists) {
                 throw new ActionError({ code: 'UNAUTHORIZED', message: 'user unauthorized' });
             }
 
             if (!validTypes.includes(type)) {
+                console.error("type: ", type, filename);
                 throw new ActionError({ code: 'BAD_REQUEST', message: 'Invalid file type' });
             }
 
-            const chunksImage = await chunkImage.saveChunk(chunk, filename, chunkIndex, totalChunks);
+            const arrayBufferChunks = await chunk.arrayBuffer();
+            const chunksImage = await chunkImage.saveChunk(arrayBufferChunks, filename, chunkIndex, totalChunks);
 
             if (!chunksImage) {
                 throw new Error("Failed to upload image");
@@ -61,7 +63,7 @@ export const uploadImage = defineAction({
                 throw new Error("Failed to merge image chunks");
             }
 
-            const typeImage = type
+            const typeImage = type;
 
             const blob = new Blob([combinedBuffer], { type: typeImage });
 
@@ -75,6 +77,7 @@ export const uploadImage = defineAction({
                     status: 500,
                     body: {
                         message: "Failed to upload image",
+                        imageUrl: null,
                     },
                 };
             }

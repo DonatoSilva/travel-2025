@@ -21,8 +21,7 @@ export class imgUp {
      * @return {string}
       */
     static async update(url, file) {
-
-        if (!this.isImage(file)) null
+        if (!this.isImage(file)) return null
 
         const buffer = await file.arrayBuffer();
         const base64Image = Buffer.from(buffer).toString('base64');
