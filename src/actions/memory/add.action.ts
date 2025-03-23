@@ -29,7 +29,7 @@ export const addMemory = defineAction({
             if (!userExists) {
                 throw new ActionError({
                     code: "UNAUTHORIZED",
-                    message: "user not unauthorized, plase login",
+                    message: "user not unauthorized - add file, plase login",
                 });
             }
 

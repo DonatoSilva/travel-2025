@@ -41,7 +41,7 @@ export const getServerSecretSignature = defineAction({
         if (!userExists) {
             throw new ActionError({
                 code: "UNAUTHORIZED",
-                message: "user not unauthorized, plase login",
+                message: "user not unauthorized - get file, plase login",
             });
         }
 
