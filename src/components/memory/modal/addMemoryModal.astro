@@ -116,9 +116,7 @@ const userCurrent = firebase.auth.currentUser;
     import { createRoot } from "react-dom/client";
     import ButtonLike from "../buttons/ButtonCardLike";
     import React from "react";
-    import { chunkImage } from "@/utils/chunkImage";
-    import type { array } from "astro:schema";
-    import type { allTasks } from "nanostores";
+    import { imgUp } from "@/utils/cloudinary/ImageUp";
 
     const modal = document.getElementById(
         "addMemoryModal",
@@ -287,44 +285,9 @@ const userCurrent = firebase.auth.currentUser;
 
             // Upload all images in parallel
             showNotify("Subiendo imágenes...");
-            const maxFileSize = 3 * 1024 * 1024; // 3MB in bytes
-
             const imageUploadPromises = imageFiles.map(async (file) => {
-                const numberOfChunks = Math.ceil(file.size / maxFileSize);
-
-                const chunkSize = Math.ceil(file.size / numberOfChunks);
-
-                const imageFragments: ArrayBuffer[] =
-                    await chunkImage.divideImageInChunks(file, chunkSize);
-
-                const uploadPromises = imageFragments.map(
-                    async (fragment, index) => {
-                        const formData = new FormData();
-
-                        formData.append("chunk", new Blob([fragment]));
-                        formData.append("filename", file.name.split(".")[0]);
-                        formData.append("type", file.type);
-                        formData.append("chunkIndex", index.toString());
-                        formData.append(
-                            "totalChunks",
-                            imageFragments.length.toString(),
-                        );
-
-                        const { data, error } =
-                            await actions.Memory.uploadImage(formData);
-
-                        if (error || !data) {
-                            throw new Error(
-                                error?.message || "Error al subir la imagen",
-                            );
-                        }
-
-                        return data.body.imageUrl ?? "";
-                    },
-                );
-
-                const imageUrl = await Promise.all(uploadPromises);
-                return imageUrl[imageUrl.length - 1];
+                const url = await imgUp.update("", file);
+                return url;
             });
 
             const imageUrls = await Promise.all(imageUploadPromises);
