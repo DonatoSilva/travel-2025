@@ -1,3 +1,4 @@
+import { firebase } from '@/firebase/config'
 import { actions } from 'astro:actions'
 
 export class imgUp {
@@ -13,7 +14,7 @@ export class imgUp {
      * @param {string} folder
      * @return {string}
       */
-    static async update(folder, file) {
+    static async update(folder, file, idToken) {
         try {
             if (!this.isImage(file)) return null
 
@@ -21,6 +22,7 @@ export class imgUp {
                 {
                     type: file.type,
                     folder: folder,
+                    idToken: idToken,
                 }
             )
 

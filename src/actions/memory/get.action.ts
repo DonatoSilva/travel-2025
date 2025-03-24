@@ -1,18 +1,19 @@
-import type { User as UserType, AlbumPreView, Album as AlbumType, AlbumView, Comment as CommentType } from "@/interfaces";
+import type { User as UserType, AlbumPreView, Album as AlbumType, AlbumView } from "@/interfaces";
+
 import { z } from "astro:schema";
 import { ActionError, defineAction } from "astro:actions";
 import { Album, Comment, User, db, eq, count, Photo } from "astro:db";
 
 import { v2 as cloudinary } from 'cloudinary';
-import getServerSecretSignal from "@/utils/cloudinary/getServerSecretSignal";
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, getSecret } from 'astro:env/server';
-import { firebase } from "@/firebase/config";
+import getServerSecretSignal from "@/utils/cloudinary/getServerSecretSignal";
 
+import { getAuth } from "firebase-admin/auth";
+import { app } from "@/firebase/configServer";
 
 // Define valid types 
 const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-// Define the schema for the array of image URLs
-
+const auth = getAuth(app);
 
 export const getServerSecretSignature = defineAction({
     accept: 'json',
@@ -25,9 +26,14 @@ export const getServerSecretSignature = defineAction({
                 }
             ),
             folder: z.string().optional().default(''),
+            idToken: z.string().nonempty(
+                {
+                    message: "idToken is required",
+                }
+            )
         }
     ),
-    handler: async ({ folder }) => {
+    handler: async ({ folder, idToken }) => {
 
         cloudinary.config({
             cloud_name: CLOUDINARY_CLOUD_NAME,
@@ -35,33 +41,14 @@ export const getServerSecretSignature = defineAction({
             api_secret: getSecret('CLOUDINARY_API_SECRET'),
         })
 
-        const user = firebase.auth.currentUser;
-        const userExists = !!user
+        const user = await auth.verifyIdToken(idToken, true);
+        const userExists = user !== null;
 
         if (!userExists) {
             throw new ActionError({
                 code: "UNAUTHORIZED",
-                message: "user not unauthorized - get file, plase login",
+                message: "user not unauthorized, plase login",
             });
-        }
-
-        const userData = {
-            imgUrl: user.photoURL || '',
-            name: user.displayName || '',
-            id: user.uid
-        }
-
-        const userInDB = await db.select().from(User).where(eq(User.id, user.uid));
-
-        if (userInDB.length === 0) {
-            const res = await db.insert(User).values(userData);
-
-            if (res.rowsAffected === 0) {
-                throw new ActionError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Error adding user",
-                });
-            }
         }
 
         return getServerSecretSignal(cloudinary, CLOUDINARY_API_KEY.toString(), getSecret('CLOUDINARY_API_SECRET') ?? '', folder);
@@ -74,7 +61,6 @@ export const getAlbums = defineAction({
     handler: async ({ },) => {
         try {
             const albumsCardData: AlbumPreView[] = []
-
             const albumsData = await db.select().from(Album).all();
 
             for (const album of albumsData) {

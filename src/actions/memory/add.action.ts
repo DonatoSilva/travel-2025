@@ -2,7 +2,7 @@ import { ActionError, defineAction } from "astro:actions";
 import type { Comment as CommentType, ImageBackEnd as Image } from "@/interfaces";
 import { z } from "astro:schema";
 
-import { Album, db, eq, Photo, User, Comment } from 'astro:db'
+import { Album, db, eq, Photo, Comment } from 'astro:db'
 import { v4 as UUID } from 'uuid';
 import { firebase } from "@/firebase/config";
 
@@ -12,13 +12,12 @@ const ImageUrlSchema = z.array(
     })
 );
 
-
 export const addMemory = defineAction({
-    accept: 'json', // Changed from 'form' to 'json'
+    accept: 'json',
     input: z.object({
         title: z.string(),
         description: z.string().optional(),
-        imageUrls: ImageUrlSchema, // Changed from images to imageUrls
+        imageUrls: ImageUrlSchema,
         imgDescription: z.array(z.string()),
     }),
     handler: async ({ title, description, imageUrls, imgDescription }) => {
@@ -29,14 +28,8 @@ export const addMemory = defineAction({
             if (!userExists) {
                 throw new ActionError({
                     code: "UNAUTHORIZED",
-                    message: "user not unauthorized - add file, plase login",
+                    message: "user not unauthorized, plase login",
                 });
-            }
-
-            const userData = {
-                imgUrl: user.photoURL || '',
-                name: user.displayName || '',
-                id: user.uid
             }
 
             if (!title || !imageUrls || !imgDescription) {
@@ -49,12 +42,6 @@ export const addMemory = defineAction({
                 };
             }
             const queries: any = [];
-
-            const userInDB = await db.select().from(User).where(eq(User.id, user.uid));
-
-            if (userInDB.length === 0) {
-                queries.push(db.insert(User).values(userData));
-            }
 
             const newAlbumData = {
                 id: UUID(),
@@ -86,6 +73,13 @@ export const addMemory = defineAction({
 
             await db.batch(queries);
 
+            // Get user data for response
+            const userData = {
+                imgUrl: user.photoURL || '',
+                name: user.displayName || '',
+                id: user.uid
+            };
+
             return {
                 ok: true,
                 status: 200,
@@ -101,7 +95,6 @@ export const addMemory = defineAction({
     },
 })
 
-
 /// agregar un commentario a la base de datos Comment
 export const addComment = defineAction({
     accept: 'json',
@@ -114,39 +107,23 @@ export const addComment = defineAction({
             const album = await db.select().from(Album).where(eq(Album.id, albumId)).limit(1);
 
             if (!album.length) {
-                return {
-                    ok: false,
-                    status: 404,
-                    body: {
-                        message: "Album not found",
-                    },
-                };
+                throw new ActionError({
+                    code: "NOT_FOUND",
+                    message: "Album not found",
+                });
             }
 
             const user = firebase.auth.currentUser;
             const userExists = !!user
 
             if (!userExists) {
-                return {
-                    ok: false,
-                    status: 401,
-                    body: {
-                        message: "Unauthorized",
-                    },
-                };
+                throw new ActionError({
+                    code: "UNAUTHORIZED",
+                    message: "user not unauthorized, plase login",
+                })
             }
 
-            const userInDB = await db.select().from(User).where(eq(User.id, user.uid));
-
-            if (!userInDB.length) {
-                const newUser = {
-                    imgUrl: user.photoURL || '',
-                    name: user.displayName || '',
-                    id: user.uid
-                }
-
-                await db.insert(User).values(newUser);
-            }
+            // Removed redundant user creation code since users are created during login
 
             const newComment: CommentType = {
                 id: UUID(),
@@ -159,13 +136,10 @@ export const addComment = defineAction({
             const arrow = await db.insert(Comment).values(newComment);
 
             if (arrow.rowsAffected === 0) {
-                return {
-                    ok: false,
-                    status: 500,
-                    body: {
-                        message: "Error adding comment",
-                    },
-                };
+                throw new ActionError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Error adding comment",
+                });
             }
 
             return {
@@ -193,14 +167,10 @@ export const addShare = defineAction({
             const album = await db.select().from(Album).where(eq(Album.id, albumId)).limit(1);
 
             if (!album.length) {
-                return {
-                    ok: false,
-                    status: 404,
-                    body: {
-                        message: "Album not found",
-                        newShare: 0,
-                    },
-                };
+                throw new ActionError({
+                    code: "NOT_FOUND",
+                    message: "Album not found",
+                });
             }
 
             const currentShare = album[0].share ?? 0;

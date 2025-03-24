@@ -104,6 +104,7 @@ const userCurrent = firebase.auth.currentUser;
 </style>
 
 <script>
+    import { firebase } from "@/firebase/config";
     import type {
         AlbumPreView,
         ImageBackEnd,
@@ -283,10 +284,16 @@ const userCurrent = firebase.auth.currentUser;
                 }
             });
 
+            await firebase.auth.currentUser?.getIdToken(true);
+            const idToken = await firebase.auth.currentUser?.getIdToken();
+            if (!idToken) {
+                throw new Error("Unauthorized");
+            }
+
             // Upload all images in parallel
             showNotify("Subiendo imágenes...");
             const imageUploadPromises = imageFiles.map(async (file) => {
-                const url = await imgUp.update("", file);
+                const url = await imgUp.update("", file, idToken);
                 return url;
             });
 
