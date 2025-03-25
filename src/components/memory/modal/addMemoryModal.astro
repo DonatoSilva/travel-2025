@@ -105,11 +105,11 @@ const userCurrent = firebase.auth.currentUser;
 
 <script>
     import { firebase } from "@/firebase/config";
+    import { v4 as uuid } from "uuid";
     import type {
         AlbumPreView,
         ImageBackEnd,
-        ImageFrontEnd as Image,
-        Memory,
+        ImageFrontEnd,
     } from "@/interfaces";
     import { addImgStore } from "@/store/memory/addStore";
     import { showNotify } from "@/utils/popsNotification";
@@ -223,13 +223,9 @@ const userCurrent = firebase.auth.currentUser;
             }),
         );
 
-        if (ContentAlbums.children.length > 1) {
-            ContentAlbums.insertBefore(
-                cardAlbumCustomElement,
-                ContentAlbums.children[1],
-            );
-        } else {
-            ContentAlbums.append(cardAlbumCustomElement);
+        ContentAlbums.append(cardAlbumCustomElement);
+
+        if (noAlbumsMessage) {
             noAlbumsMessage.remove();
         }
     };
@@ -284,6 +280,7 @@ const userCurrent = firebase.auth.currentUser;
                 }
             });
 
+            console.log(firebase.auth.currentUser);
             await firebase.auth.currentUser?.getIdToken(true);
             const idToken = await firebase.auth.currentUser?.getIdToken();
             if (!idToken) {
@@ -293,7 +290,11 @@ const userCurrent = firebase.auth.currentUser;
             // Upload all images in parallel
             showNotify("Subiendo imágenes...");
             const imageUploadPromises = imageFiles.map(async (file) => {
-                const url = await imgUp.update("", file, idToken);
+                const url = await imgUp.update(
+                    firebase.auth.currentUser?.displayName ?? uuid(),
+                    file,
+                    idToken,
+                );
                 return url;
             });
 

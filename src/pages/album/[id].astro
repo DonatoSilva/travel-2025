@@ -267,7 +267,7 @@ const isLiked = !!likes.length;
     };
 
     const addComment = (data: Comment) => {
-        const userCurrent = firebase.auth.currentUser;
+        const userCurrent = Astro.locals.user;
         const clone = template.content.cloneNode(true) as DocumentFragment;
 
         // Function to update DOM
@@ -326,7 +326,7 @@ const isLiked = !!likes.length;
             "login-modal",
         ) as HTMLDialogElement;
         const comment = textArea.value.trim();
-        const userCurrent = firebase.auth.currentUser;
+        const userCurrent = Astro.locals.user;
 
         if (!userCurrent) {
             showNotify("Debes iniciar sesión para comentar 🫥");

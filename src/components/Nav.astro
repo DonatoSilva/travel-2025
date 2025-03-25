@@ -1,12 +1,11 @@
 ---
-import { firebase } from "src/firebase/config";
 import Logo from "./Logo.astro";
 import Modal from "./Modal.astro";
 import { actions } from "astro:actions";
 import Button from "./Button.astro";
 
-const userExists = Astro.locals.userExists;
-const user = firebase.auth.currentUser;
+const userExists = Astro.locals.isAuthenticated;
+const user = Astro.locals.user;
 
 const { data: invitations, error } = await Astro.callAction(
     actions.Invited.get,
@@ -233,6 +232,7 @@ const isInvited = invitationsData?.some(
         GoogleAuthProvider,
         signInWithPopup,
         signOut,
+        browserLocalPersistence,
     } from "firebase/auth";
 
     import { actions } from "astro:actions";
@@ -246,9 +246,8 @@ const isInvited = invitationsData?.some(
         "#logout-button",
     ) as HTMLButtonElement;
 
-    const auth = firebase.auth;
-
     loginButton.addEventListener("click", async () => {
+        firebase.auth.setPersistence(browserLocalPersistence);
         const provider = new GoogleAuthProvider();
 
         provider.setCustomParameters({
@@ -256,9 +255,9 @@ const isInvited = invitationsData?.some(
         });
 
         try {
-            const result = await signInWithPopup(auth, provider);
-
-            const { error } = await actions.Google.login(result);
+            const result = await signInWithPopup(firebase.auth, provider);
+            const idToken = await result.user.getIdToken();
+            const { error } = await actions.Google.login({ idToken });
 
             if (error) {
                 alert("Ocurrio un error al iniciar sesión");
@@ -274,7 +273,7 @@ const isInvited = invitationsData?.some(
 
     logoutButton.addEventListener("click", async () => {
         try {
-            await signOut(auth).then(async () => {
+            await signOut(firebase.auth).then(async () => {
                 await actions.Google.logOut();
                 await navigate("/");
             });

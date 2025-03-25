@@ -22,8 +22,16 @@ interface ImportMetaEnv {
 
 declare namespace App {
     interface Locals {
-        userExists: boolean;
+        user: User | null;
+        isAuthenticated: boolean;
     }
+}
+
+interface User {
+    uid: string;
+    email: string;
+    displayName: string;
+    photoURL: string;
 }
 
 interface ImportMeta {

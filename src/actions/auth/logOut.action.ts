@@ -1,19 +1,21 @@
 
 import { defineAction } from "astro:actions";
-import { signOut } from "firebase/auth";
-import { firebase } from "src/firebase/config";
 
 
 export const logOut = defineAction({
-    handler: async (_, context) => {
+    handler: async (_, { cookies }) => {
         try {
-            const auth = firebase.auth;
+            const sessionCookie = cookies.get("__session")?.value;
 
-            if (!auth.currentUser) {
-                return
+            if (!sessionCookie) {
+                return;
             }
 
-            await signOut(auth);
+            cookies.delete("__session", {
+                path: "/",
+                httpOnly: true,
+                secure: true,
+            })
 
             return { ok: true };
         } catch (error) {

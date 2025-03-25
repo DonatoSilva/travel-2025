@@ -1,27 +1,30 @@
-import { firebase } from "@/firebase/config";
 import { defineAction } from "astro:actions";
 import { db, eq, User, Like, and, Album } from "astro:db";
 import { v4 as UUID } from 'uuid';
 import { z } from "astro:schema";
+import { verifySession } from "@scripts/verifySession";
 
 import type { User as UserType } from "@/interfaces"
 import type { Like as LikeType } from "@/interfaces/memory/likes";
-
 
 export const handleLikeDislike = defineAction({
     accept: 'json',
     input: z.object({
         albumId: z.string(),
     }),
-    handler: async ({ albumId }) => {
+    handler: async ({ albumId }, { cookies }) => {
         try {
-            const user = firebase.auth.currentUser;
+            // Use session cookie instead of client-side Firebase auth
+            const sessionCookie = cookies.get("__session")?.value;
+            const user = await verifySession(sessionCookie ?? '');
 
             if (!user) {
                 throw new Error('User not authenticated');
             }
+
             const existUser = await db.select().from(User).where(eq(User.id, user.uid));
 
+            // Rest of the function remains the same
             const albumData = await db.select().from(Album).where(eq(Album.id, albumId)).limit(1);
             const currentLikes = albumData[0].likes ?? 0;
 

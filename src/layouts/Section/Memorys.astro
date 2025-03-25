@@ -10,8 +10,8 @@ import { actions } from "astro:actions";
 import type { AlbumPreView } from "@/interfaces";
 import { firebase } from "@/firebase/config";
 
-const user = firebase.auth.currentUser;
-const userExists = Astro.locals.userExists;
+const user = Astro.locals.user;
+const isAuthenticated = Astro.locals.isAuthenticated;
 const { data, error } = await Astro.callAction(actions.Memory.getAlbums, {});
 const { data: dataInvited, error: errorInvited } = await Astro.callAction(
     actions.Invited.isInvited,
@@ -58,12 +58,12 @@ const albumTemplate: AlbumPreView = {
             </p>
         </div>
         <ContentAlbums>
-            {userExists && isInveted ? <AddMemory /> : ""}
+            {isAuthenticated && isInveted ? <AddMemory /> : ""}
             {
                 albums?.length == 0 ? (
                     <div
                         class={
-                            `${!userExists ? "lg:col-span-full" : "lg:col-span-1"}` +
+                            `${!isAuthenticated ? "lg:col-span-full" : "lg:col-span-1"}` +
                             " text-center flex flex-col justify-center items-center h-full col-span-full md:col-span-2  text-gray-400  min-h-60 "
                         }
                         id="noAlbumsMessage"

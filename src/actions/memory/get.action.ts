@@ -13,7 +13,7 @@ import { app } from "@/firebase/configServer";
 
 // Define valid types 
 const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-const auth = getAuth(app);
+const auth = getAuth(app!);
 
 export const getServerSecretSignature = defineAction({
     accept: 'json',

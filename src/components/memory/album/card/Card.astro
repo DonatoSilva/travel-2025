@@ -14,10 +14,10 @@ interface Props {
 const { id, album, isTemplate = false } = Astro.props;
 const user: UserType = album.user;
 
-const existUser = Astro.locals.userExists;
-const currectUser = firebase.auth.currentUser;
+const currectUser = Astro.locals.user;
+const isAuthenticated = Astro.locals.isAuthenticated;
 
-const liked = existUser
+const liked = isAuthenticated
     ? await db
           .select()
           .from(Like)

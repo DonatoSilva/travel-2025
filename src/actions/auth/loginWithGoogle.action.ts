@@ -1,53 +1,46 @@
-
+import { app } from "@/firebase/configServer";
+import { getAuth } from "firebase-admin/auth";
 import { defineAction } from "astro:actions";
 import { db, User, eq } from "astro:db";
 import { z } from "astro:schema";
-import { browserLocalPersistence, GoogleAuthProvider, setPersistence, signInWithCredential } from "firebase/auth";
-import { firebase } from "src/firebase/config";
+import type { App } from "firebase-admin/app";
 
 
 export const login = defineAction({
-    accept: 'json',
-    input: z.any(),
-    handler: async (credentials) => {
+    accept: "json",
+    input: z.object({ idToken: z.string() }),
+    handler: async ({ idToken }, { cookies }) => {
         try {
-            const credential = GoogleAuthProvider.credentialFromResult(credentials);
+            const auth = getAuth(app as App);
 
-            if (!credential) {
-                throw new Error('Invalid credential');
-            }
+            const decodedToken = await auth.verifyIdToken(idToken);
+            const userId = decodedToken.uid;
 
-            const auth = firebase.auth;
-
-            await setPersistence(auth, browserLocalPersistence)
-                .then(
-                    async () => {
-                        return await signInWithCredential(firebase.auth, credential);
-                    }
-                )
-
-
-            if (!auth || !auth.currentUser) {
-                throw new Error('Invalid auth')
-            }
-
-
-            const user = auth.currentUser;
-            const userData = {
-                imgUrl: user.photoURL || '',
-                name: user.displayName || '',
-                id: user.uid
-            }
-
-            const userInDB = await db.select().from(User).where(eq(User.id, user.uid));
+            const userInDB = await db.select().from(User).where(eq(User.id, userId));
 
             if (userInDB.length === 0) {
-                await db.insert(User).values(userData);
+                await db.insert(User).values({
+                    id: userId,
+                    name: decodedToken.name || "",
+                    imgUrl: decodedToken.picture || "",
+                });
             }
+
+            // 🔥 Crear cookie de sesión
+            const sessionCookie = await auth.createSessionCookie(idToken, {
+                expiresIn: 60 * 60 * 24 * 5 * 1000,
+            });
+
+            cookies.set("__session", sessionCookie, {
+                path: "/",
+                httpOnly: true,
+                secure: true,
+            });
 
             return { ok: true };
         } catch (error) {
-            throw error;
+            console.error(error);
+            throw new Error("Error de autenticación");
         }
     },
-})
+});

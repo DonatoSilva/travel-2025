@@ -4,7 +4,7 @@ import { z } from "astro:schema";
 
 import { Album, db, eq, Photo, Comment } from 'astro:db'
 import { v4 as UUID } from 'uuid';
-import { firebase } from "@/firebase/config";
+import { verifySession } from "@/assets/scripts/verifySession";
 
 const ImageUrlSchema = z.array(
     z.string().url({
@@ -20,10 +20,11 @@ export const addMemory = defineAction({
         imageUrls: ImageUrlSchema,
         imgDescription: z.array(z.string()),
     }),
-    handler: async ({ title, description, imageUrls, imgDescription }) => {
+    handler: async ({ title, description, imageUrls, imgDescription }, { cookies }) => {
         try {
-            const user = firebase.auth.currentUser;
-            const userExists = !!user
+            const sessionCookie = cookies.get("__session")?.value;
+            const user = await verifySession(sessionCookie ?? '');
+            const userExists = !!user;
 
             if (!userExists) {
                 throw new ActionError({
@@ -102,7 +103,7 @@ export const addComment = defineAction({
         albumId: z.string(),
         comment: z.string(),
     }),
-    handler: async ({ albumId, comment }) => {
+    handler: async ({ albumId, comment }, { cookies }) => {
         try {
             const album = await db.select().from(Album).where(eq(Album.id, albumId)).limit(1);
 
@@ -113,8 +114,10 @@ export const addComment = defineAction({
                 });
             }
 
-            const user = firebase.auth.currentUser;
-            const userExists = !!user
+            // Updated user verification to use session cookie
+            const sessionCookie = cookies.get("__session")?.value;
+            const user = await verifySession(sessionCookie ?? '');
+            const userExists = !!user;
 
             if (!userExists) {
                 throw new ActionError({
@@ -122,8 +125,6 @@ export const addComment = defineAction({
                     message: "user not unauthorized, plase login",
                 })
             }
-
-            // Removed redundant user creation code since users are created during login
 
             const newComment: CommentType = {
                 id: UUID(),
