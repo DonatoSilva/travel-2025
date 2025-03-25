@@ -19,15 +19,12 @@ const serviceAccount = {
 
 // Add this configuration to match the client app ID
 const initApp = () => {
-    if (import.meta.env.PROD) {
-        console.info('PROD env detected. Using default service account.')
-        return initializeApp()
+    if (!getApps().length) {
+        initializeApp({
+            credential: cert(serviceAccount as ServiceAccount),
+            projectId: process.env.FIREBASE_PROJECT_ID,
+        });
     }
-    console.info('Loading service account from env.')
-    return initializeApp({
-        credential: cert(serviceAccount as ServiceAccount),
-        projectId: FIREBASE_PROJECT_ID,
-    })
 }
 
 export const app = activeApps.length === 0 ? initApp() : activeApps[0];
