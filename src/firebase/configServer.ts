@@ -17,17 +17,12 @@ const serviceAccount = {
     client_x509_cert_url: getSecret('FIREBASE_CLIENT_X509_CERT_URL'),
 };
 
-// Add this configuration to match the client app ID
-const initApp = () => {
-    if (import.meta.env.PROD) {
-        console.info('PROD env detected. Using default service account.')
-        return initializeApp()
-    }
-    console.info('Loading service account from env.')
-    return initializeApp({
+// Inicializamos Firebase Admin SDK
+if (!getApps().length) {
+    initializeApp({
         credential: cert(serviceAccount as ServiceAccount),
-        projectId: FIREBASE_PROJECT_ID,
-    })
+        projectId: process.env.FIREBASE_PROJECT_ID,
+    });
 }
 
-export const app = activeApps.length === 0 ? initApp() : activeApps[0];
+export const app = activeApps[0];
