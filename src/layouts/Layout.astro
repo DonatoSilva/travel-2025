@@ -1,5 +1,7 @@
 ---
 import Logo from "src/components/Logo.astro";
+import SpeedInsights from "@vercel/speed-insights/astro";
+
 interface Props {
 	title: string;
 	description?: string;
@@ -29,9 +31,10 @@ const {
 		<meta name="twitter:card" content="summary" />
 		<meta name="twitter:title" content={title} />
 		<meta name="twitter:description" content={description} />
-		<meta name="twitter:image" content={img} } />
+		<meta name="twitter:image" content={img} />
 
 		<title>{title}</title>
+		<SpeedInsights />
 	</head>
 	<body>
 		<slot />
@@ -118,12 +121,19 @@ const {
 			const btnShare = this.querySelector(".share") as HTMLSpanElement;
 
 			async function handleShare() {
+				let url = window.location.href;
+				const urlOrigin = window.location.origin;
+
+				if (urlOrigin === url || urlOrigin + "/" === url) {
+					url = `${urlOrigin}/album/${id}`;
+				}
+
 				try {
 					showNotify("Compartiendo... 🚀");
 					const shareData = {
 						title: "Compartir álbum de Travel-2025",
 						text: "¡Mira este increíble álbum de viajes!",
-						url: window.location.href + "/album/" + id,
+						url: url,
 					};
 
 					if (navigator.share) {
@@ -134,13 +144,9 @@ const {
 						showNotify("¡Enlace copiado al portapapeles! 📋");
 					}
 
-					console.log("antes de la solicitud");
-
 					const { data, error } = await actions.Memory.addShare({
 						albumId: id ?? "",
 					});
-
-					console.log("despues de la solicitud");
 
 					if (error) {
 						console.error(
@@ -148,8 +154,6 @@ const {
 							error,
 						);
 					}
-
-					console.log("data", data);
 
 					const { newShare } = data?.body!;
 					btnShareValue.textContent = newShare.toString();
