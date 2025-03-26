@@ -36,8 +36,6 @@ export const onRequest = defineMiddleware(
             locals.isAuthenticated = true;
         }
 
-
-
         return next();
     }
 )

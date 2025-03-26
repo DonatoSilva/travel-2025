@@ -267,7 +267,7 @@ const isLiked = !!likes.length;
     };
 
     const addComment = (data: Comment) => {
-        const userCurrent = Astro.locals.user;
+        const userCurrent = firebase.auth.currentUser;
         const clone = template.content.cloneNode(true) as DocumentFragment;
 
         // Function to update DOM
@@ -306,7 +306,11 @@ const isLiked = !!likes.length;
             userPerfilName.textContent = userCurrent?.displayName ?? "";
 
             commentBody.prepend(commentElement);
-            commentEmpy.remove(); // Remove empty comment message
+
+            if (commentEmpy) {
+                commentEmpy.remove();
+            }
+
             reset();
         };
 
@@ -318,6 +322,13 @@ const isLiked = !!likes.length;
         }
     };
 
+    textArea.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            btnNewComment.click();
+        }
+    });
+
     btnNewComment.addEventListener("click", async () => {
         btnNewComment.disabled = true;
         textArea.disabled = true;
@@ -326,7 +337,7 @@ const isLiked = !!likes.length;
             "login-modal",
         ) as HTMLDialogElement;
         const comment = textArea.value.trim();
-        const userCurrent = Astro.locals.user;
+        const userCurrent = firebase.auth.currentUser;
 
         if (!userCurrent) {
             showNotify("Debes iniciar sesión para comentar 🫥");
