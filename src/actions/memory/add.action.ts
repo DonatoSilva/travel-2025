@@ -2,7 +2,7 @@ import { ActionError, defineAction } from "astro:actions";
 import type { Comment as CommentType, ImageBackEnd as Image } from "@/interfaces";
 import { z } from "astro:schema";
 
-import { Album, db, eq, Photo, Comment } from 'astro:db'
+import { Album, db, eq, Photo, Comment, count } from 'astro:db'
 import { v4 as UUID } from 'uuid';
 import { verifySession } from "@/assets/scripts/verifySession";
 
@@ -135,6 +135,8 @@ export const addComment = defineAction({
             };
 
             const arrow = await db.insert(Comment).values(newComment);
+            const commentCount = await db.select({ value: count() }).from(Comment).where(eq(Comment.albumId, albumId));
+            const commentCountValue = commentCount[0].value;
 
             if (arrow.rowsAffected === 0) {
                 throw new ActionError({
@@ -149,6 +151,7 @@ export const addComment = defineAction({
                 body: {
                     message: "Comment added successfully",
                     commentData: newComment,
+                    commentCount: commentCountValue,
                 },
             };
         } catch (error) {

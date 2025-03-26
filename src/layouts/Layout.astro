@@ -102,3 +102,66 @@ const {
 		}
 	}
 </style>
+
+<script>
+	import { showNotify } from "@/utils/popsNotification";
+	import { actions } from "astro:actions";
+
+	class CardAlbumFooter extends HTMLElement {
+		constructor() {
+			super();
+
+			const id = this.getAttribute("data-id")?.valueOf();
+			const btnShareValue = this.querySelector(
+				".share .value",
+			) as HTMLSpanElement;
+			const btnShare = this.querySelector(".share") as HTMLSpanElement;
+
+			async function handleShare() {
+				try {
+					showNotify("Compartiendo... 🚀");
+					const shareData = {
+						title: "Compartir álbum de Travel-2025",
+						text: "¡Mira este increíble álbum de viajes!",
+						url: window.location.href + "/album/" + id,
+					};
+
+					if (navigator.share) {
+						await navigator.share(shareData);
+						showNotify("¡Compartido con éxito! 🎉");
+					} else {
+						await navigator.clipboard.writeText(shareData.url);
+						showNotify("¡Enlace copiado al portapapeles! 📋");
+					}
+
+					console.log("antes de la solicitud");
+
+					const { data, error } = await actions.Memory.addShare({
+						albumId: id ?? "",
+					});
+
+					console.log("despues de la solicitud");
+
+					if (error) {
+						console.error(
+							`Error al compartir, album ${id}:`,
+							error,
+						);
+					}
+
+					console.log("data", data);
+
+					const { newShare } = data?.body!;
+					btnShareValue.textContent = newShare.toString();
+				} catch (err) {
+					console.error("Error al compartir:", err);
+					showNotify("Error al compartir el álbum. 😢");
+				}
+			}
+
+			btnShare?.addEventListener("click", handleShare);
+		}
+	}
+
+	customElements.define("card-album-footer", CardAlbumFooter);
+</script>

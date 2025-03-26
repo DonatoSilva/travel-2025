@@ -266,6 +266,22 @@ const isLiked = !!likes.length;
         return date.toLocaleDateString("es-ES", dateOptions);
     };
 
+    const updateCountComments = (newValue: string) => {
+        const cardAlbumFooter = document.querySelector(
+            ".card-Album-footer",
+        ) as HTMLDivElement;
+        const comment = cardAlbumFooter.querySelector(
+            ".comment",
+        ) as HTMLSpanElement;
+        const value = comment.querySelector(".value") as HTMLSpanElement;
+
+        if (!value) {
+            window.location.reload();
+        }
+
+        value.textContent = newValue;
+    };
+
     const addComment = (data: Comment) => {
         const userCurrent = firebase.auth.currentUser;
         const clone = template.content.cloneNode(true) as DocumentFragment;
@@ -385,6 +401,7 @@ const isLiked = !!likes.length;
 
         const insertedCommentData = data.body.commentData;
         addComment(insertedCommentData!);
+        updateCountComments(data.body.commentCount.toString());
 
         btnNewComment.classList.remove("animate-pulse");
         btnText.textContent = "Enviar";
