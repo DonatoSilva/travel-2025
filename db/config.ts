@@ -1,4 +1,5 @@
 import { defineDb, defineTable, column, } from 'astro:db';
+
 const Subscription = defineTable({
   columns: {
     id: column.number({ primaryKey: true }),
