@@ -1,20 +1,19 @@
 ---
 import Logo from "./Logo.astro";
 import Modal from "./Modal.astro";
-import { actions } from "astro:actions";
 import Button from "./Button.astro";
+import type { Invitation } from "@/interfaces/invited/invitation";
 
 const userExists = Astro.locals.isAuthenticated;
 const user = Astro.locals.user;
 
-const { data: invitations, error } = await Astro.callAction(
-    actions.Invited.get,
-    {},
-);
+interface Props {
+    invitations: Invitation[];
+}
 
-const invitationsData = invitations?.invitations ?? [];
-const isInvited = invitationsData?.some(
-    (invitation) => invitation.email === user?.email,
+const { invitations = [] } = Astro.props;
+const isInvited = invitations.some(
+    (invitation: Invitation) => invitation.email === user?.email,
 );
 ---
 
@@ -75,7 +74,7 @@ const isInvited = invitationsData?.some(
     <div class="modal-body">
         <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 my-auto">
             {
-                invitationsData?.map((invitation) => (
+                invitations?.map((invitation) => (
                     <li class="flex items-center gap-2 rounded-lg bg-orange-600 w-full">
                         <span class="px-4 py-2 rounded-lg font-medium bg-orange-600 text-2xl text-white">
                             {invitation.name

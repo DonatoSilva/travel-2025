@@ -6,25 +6,15 @@ import ContentAlbums from "@memory/album/ContentAlbums.astro";
 import Image from "astro/components/Image.astro";
 
 import HeaderGallery from "@images/galery/header.jpg";
-import { actions } from "astro:actions";
 import type { AlbumPreView } from "@/interfaces";
-import { firebase } from "@/firebase/config";
-
-const user = Astro.locals.user;
 const isAuthenticated = Astro.locals.isAuthenticated;
-const { data, error } = await Astro.callAction(actions.Memory.getAlbums, {});
-const { data: dataInvited, error: errorInvited } = await Astro.callAction(
-    actions.Invited.isInvited,
-    { $email: user?.email ?? "" },
-);
+const { albums, isInvitado, error } = Astro.props;
 
 if (error) {
     console.log(error);
 }
 
-const isInveted = dataInvited?.isInvited;
-
-const albums: AlbumPreView[] = data!;
+const isInveted = isInvitado;
 
 const albumTemplate: AlbumPreView = {
     id: "",
@@ -104,7 +94,7 @@ const albumTemplate: AlbumPreView = {
                         </span>
                     </div>
                 ) : (
-                    albums.map((albumData) => (
+                    albums.map((albumData: AlbumPreView) => (
                         <Card id={albumData.id} album={albumData} />
                     ))
                 )

@@ -1,14 +1,4 @@
----
-const stringDate = "2025-01-27T05:30:00";
-const targetDate = new Date(stringDate).getTime();
-
-const now = new Date().getTime();
-const timeLeft = targetDate - now;
-
-let isNow = timeLeft <= 0;
----
-
-<div id="countdown" class="" data-time={stringDate} data-is-now={isNow}>
+<div id="countdown" class="">
     <div
         class="text-center text-sm font-light flex flex-row gap-8 [&_div]:flex [&_div]:flex-col [&_span]:text-6xl [&_span]:font-semibold"
     >
@@ -25,24 +15,20 @@ let isNow = timeLeft <= 0;
             <span id="seconds">00</span>segundos
         </div>
     </div>
-    {
-        isNow ? (
-            <div class="text-center text-md font-light">
-                <br />
-                <h1>Vamos de viaje 🛵</h1>
-            </div>
-        ) : (
-            ""
-        )
-    }
+
+    <div class="text-center text-md font-light">
+        <br />
+        <h1>Vamos de viaje 🛵</h1>
+    </div>
 </div>
 
 <script>
     import JSConfetti from "js-confetti";
+    /* 
     const countdown = document.getElementById("countdown") as HTMLDivElement;
     const stringDate = countdown.getAttribute("data-time") as string;
 
-    const targetDate = new Date(stringDate).getTime();
+    const targetDate = new Date(stringDate).getTime(); */
 
     function confetti() {
         const confetti = new JSConfetti();
@@ -53,7 +39,11 @@ let isNow = timeLeft <= 0;
         });
     }
 
-    function insertHtml() {
+    document.addEventListener("DOMContentLoaded", () => {
+        confetti();
+    });
+
+    /*  function insertHtml() {
         const isNow = countdown.getAttribute("data-is-now") === "true";
 
         if (!isNow) {
@@ -65,8 +55,8 @@ let isNow = timeLeft <= 0;
                 </div>`,
             );
         }
-    }
-
+    } */
+    /* 
     function addCero(number: string) {
         if (Number(number) < 0) {
             return "00";
@@ -106,5 +96,5 @@ let isNow = timeLeft <= 0;
         }
     }
 
-    const interval = setInterval(updateCountdown, 1000);
+    const interval = setInterval(updateCountdown, 1000); */
 </script>

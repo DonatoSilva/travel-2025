@@ -1,19 +1,29 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Init from "../layouts/Section/Init.astro";
-import Image from "astro/components/Image.astro";
 
 import Where from "src/layouts/Section/Where.astro";
 import Invitation from "src/layouts/Section/Invitation.astro";
 import Memorys from "src/layouts/Section/Memorys.astro";
 import Questions from "src/layouts/Section/Questions.astro";
 import AddMemoryModal from "@components/memory/modal/addMemoryModal.astro";
+import { actions } from "astro:actions";
+
+const { data: allAlbums } = await Astro.callAction(
+	actions.Memory.getAlbums,
+	{},
+);
+
+const { data: userInvitationStatus } = await Astro.callAction(
+	actions.Invited.isInvited,
+	{ $email: Astro.locals.user?.email ?? "" },
+);
 ---
 
 <Layout title="Paseo 2025">
 	<Init />
 	<Where />
-	<Memorys />
+	<Memorys albums={allAlbums} isInvitado={userInvitationStatus?.isInvited} />
 	<Questions />
 	<Invitation />
 </Layout>

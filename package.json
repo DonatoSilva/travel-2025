@@ -1,5 +1,5 @@
 {
-  "name": "out-out",
+  "name": "travel2025",
   "version": "0.0.1",
   "dependencies": {
     "@astrojs/db": "0.14.12",

@@ -1,12 +1,16 @@
 ---
+import { actions } from "astro:actions";
 import Nav from "../../components/Nav.astro";
 import Time from "../../components/Time.astro";
 import IArrow from "../../components/icons/IArrow.astro";
 import Section from "../Section.astro";
+
+const { data: invitations } = await Astro.callAction(actions.Invited.get, {});
+const invitationData = invitations?.invitations ?? [];
 ---
 
 <Section class="grid">
-    <Nav />
+    <Nav invitations={invitationData} />
     <div class="flex flex-col flex-grow gap-6 justify-center items-center">
         <h1 class="text-lg">Tiempo restante para el viaje</h1>
         <Time />
@@ -17,6 +21,4 @@ import Section from "../Section.astro";
     </div>
 </Section>
 
-<style>
-    
-</style>
+<style></style>

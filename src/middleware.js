@@ -18,9 +18,13 @@ export const onRequest = defineMiddleware(
             return redirect("/")
         }
 
-        if (!sessionCookie) {
-            locals.user = null;
-            locals.isAuthenticated = false;
+        if (!sessionCookie) return next();
+
+        const sessionCache = locals.sessionCache || (locals.sessionCache = new Map());
+
+        if (sessionCache.has(sessionCookie)) {
+            locals.user = sessionCache.get(sessionCookie);
+            locals.isAuthenticated = true;
             return next();
         }
 
@@ -29,7 +33,8 @@ export const onRequest = defineMiddleware(
                 console.log(error)
             });
 
-        const user = await auth.getUser(decodedToken.uid)
+        const user = await auth.getUser(decodedToken.uid);
+        sessionCache.set(sessionCookie, user);
 
         if (decodedToken) {
             locals.user = user;
