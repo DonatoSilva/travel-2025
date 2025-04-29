@@ -1,47 +1,32 @@
-# Astro Starter Kit: Minimal
+# Travel 2025
+<p align="center">
+<img src="https://res.cloudinary.com/dvibg2f6y/image/upload/v1743625225/d5f14113-f3bd-4d34-8a8c-ad434564c69c.png"></p>
 
-```sh
-npm create astro@latest -- --template minimal
-```
+Travel 2025 es una landing page diseñada para optimizar la experiencia de planificación de viajes, ofreciendo información con una interfaz intuitiva. Con la funcionalidad de iniciar sesión y compartir la experiencia creando una memoria (Álbumes) de viaje.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/minimal)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/minimal)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/minimal/devcontainer.json)
+[![Visitar la aplicación](https://img.shields.io/badge/Visitar%20la%20aplicaci%C3%B3n-travel--2025.vercel.app-blue)](https://travel-2025.vercel.app)
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Tecnologías Utilizadas
+<div style="display: flex; align-items: center; gap: 20px;">
+    <img src="https://raw.githubusercontent.com/github/explore/5cc0a03a302ec862c4aeac2a22a513ae31c35432/topics/astro/astro.png" alt="Astro" width="45" height="45">
+    <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/react/react-original.svg" alt="React" width="45" height="45">
+    <img src="https://img.icons8.com/color/48/000000/firebase.png" alt="Firebase" width="45" height="45">
+    <img src="https://raw.githubusercontent.com/tailwindlabs/tailwindcss/master/.github/logo-dark.svg" alt="Tailwind CSS" width="200" height="55">
+</div>
 
-## 🚀 Project Structure
+## Conocimientos Necesarios
+Para desarrollar este proyecto, fue esencial comprender:
+- Astro como SSR.
+- Firebase para autenticación.
+- Renderizado del lado del servidor (SSR).
+- Optimización de rendimiento.
+- Manejo de datos en tiempo real.
 
-Inside of your Astro project, you'll see the following folders and files:
+## Se obtuvo experiencia en:
+- Desarrollo de una aplicación web completa desde cero.
+- Integración de servicios de autenticación y gestión de datos en tiempo real.
+- Optimización del rendimiento de la aplicación.
+- Despliegue en Vercel y las limitaciones que se tienen.
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## Mejoras
+- Se realizaron optimizaciones significativas en el tiempo de carga de la aplicación. Consulta el [Changelog 0.1.0](CHANGELOG.md) para más detalles sobre los cambios implementados.
