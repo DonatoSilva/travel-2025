@@ -6,6 +6,14 @@ Travel 2025 es una landing page diseñada para optimizar la experiencia de plani
 
 [![Visitar la aplicación](https://img.shields.io/badge/Visitar%20la%20aplicaci%C3%B3n-travel--2025.vercel.app-blue)](https://travel-2025.vercel.app)
 
+## Funcionalidades que implementa  la parte dinamica de Travel 2025:
+- Inicio de sesión con Google.
+- Creación de álbumes de viaje.
+- Compartir álbumes de viaje con amigos.
+- Reaciones a álbumes de viaje.
+- Creación de comentarios en los álbumes de viaje.
+- Animaciones en la página.
+
 ## Tecnologías Utilizadas
 <div style="display: flex; align-items: center; gap: 20px;">
     <img src="https://raw.githubusercontent.com/github/explore/5cc0a03a302ec862c4aeac2a22a513ae31c35432/topics/astro/astro.png" alt="Astro" width="45" height="45">
